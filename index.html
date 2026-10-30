@@ -187,6 +187,29 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
 .pstats i{display:block;font-style:normal;font-size:8px;letter-spacing:.1em;color:#7a8798}
 .pstats b{display:block;margin-top:4px;font-size:16px;font-weight:500;color:#eef0ea}
+/* 云端排行榜 */
+.lb{padding:12px;border-radius:14px;margin-bottom:10px;
+ background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}
+.lb-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px}
+.lb-h b{font-size:13px;font-weight:600;letter-spacing:.08em;color:#f0e6d8}
+.lb-h span{font-size:8.5px;letter-spacing:.08em;color:#7a8798}
+.lb-list{display:grid;gap:4px;margin-bottom:9px}
+.lb-row{display:grid;grid-template-columns:20px 24px 1fr auto;align-items:center;gap:8px;
+ padding:5px 7px;border-radius:8px;background:rgba(0,0,0,.2);border:1px solid transparent}
+.lb-row.me{background:rgba(255,140,74,.12);border-color:rgba(255,140,74,.38)}
+.lb-rk{font:600 10px/1 ui-monospace,monospace;color:#8b97a8;text-align:center}
+.lb-row:first-child .lb-rk{color:#fbbf24}
+.lb-av{width:24px;height:24px;border-radius:50%;overflow:hidden;
+ background:rgba(255,255,255,.07) center/cover no-repeat;
+ display:flex;align-items:center;justify-content:center;font-size:10px;color:#cbd5e1}
+.lb-nm{font-size:11.5px;font-weight:500;color:#eef0ea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-sc{font:600 11px/1 ui-monospace,monospace;font-style:normal;color:#e879b8}
+.lb-empty{padding:10px 0;text-align:center;font-size:10.5px;color:#6b7789}
+.lb-foot{display:flex;gap:8px}
+.lb-foot .sbtn{flex:1;padding:8px 0;font-size:11px}
+.lb-state{margin-top:7px;min-height:12px;text-align:center;font-size:9.5px;color:#6b7789}
+.lb-state.ok{color:#86efac}
+.lb-state.err{color:#fca5a5}
 #tabbar{position:relative;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);
  background:rgba(9,13,19,.96);border-top:1px solid rgba(255,255,255,.1);
  padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(12px)}
@@ -340,7 +363,16 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
           <button class="sbtn" id="pfAvBtn" style="width:100%;padding:10px 0">上传 / 更换头像</button>
         </div>
       </div>
-      <p class="hint">头像与昵称只保存在本机浏览器中，不会上传到任何服务器。</p>
+      <div class="lb">
+        <div class="lb-h"><b>云端排行榜</b><span id="lbMeta">按累计总开采量</span></div>
+        <div class="lb-list" id="lbList"><div class="lb-empty">点击「刷新」加载</div></div>
+        <div class="lb-foot">
+          <button class="sbtn" id="lbRefresh">刷新</button>
+          <button class="sbtn" id="lbSync">同步我的成绩</button>
+        </div>
+        <div class="lb-state" id="lbState"></div>
+      </div>
+      <p class="hint">昵称、头像和累计开采量会同步到云端排行榜；矿石、涂装与镐子仍只存在本机。</p>
       <button class="btn ghost" id="btnWipe">清空本机存档</button>
     </section>
 
@@ -744,6 +776,7 @@ function end(win){
   PROF.mined += p.ore;
   if(p.ore>PROF.best) PROF.best=p.ore;
   saveProf();
+  syncLeaderboard(false);
   EL.endT.textContent=win?'任务完成':'任务失败';
   EL.endT.style.color=win?'#4ade80':'#ef4444';
   EL.eOre.textContent=p.ore; EL.eTime.textContent=Math.floor(gtime)+'s';
@@ -1355,7 +1388,8 @@ var BPS=[
 ];
 var PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
           picks:['p1'],pick:'p1',bp:{},
-          runs:0,wins:0,mined:0,best:0};
+          runs:0,wins:0,mined:0,best:0,
+          playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0};
 function skinOf(id){
   for(var i=0;i<SKINS.length;i++) if(SKINS[i].id===id) return SKINS[i];
   return SKINS[0];
@@ -1412,6 +1446,12 @@ function loadProf(){
   }
   PROF.runs=Math.max(0,o.runs|0); PROF.wins=Math.max(0,o.wins|0);
   PROF.mined=Math.max(0,o.mined|0); PROF.best=Math.max(0,o.best|0);
+  if(typeof o.playerId==='string'&&UUID_RE.test(o.playerId)) PROF.playerId=o.playerId.toLowerCase();
+  PROF.rank=Math.max(0,o.rank|0);
+  PROF.syncedScore=typeof o.syncedScore==='number'?o.syncedScore:-1;
+  PROF.syncedNick=typeof o.syncedNick==='string'?o.syncedNick:'';
+  PROF.syncedAvatarSig=typeof o.syncedAvatarSig==='string'?o.syncedAvatarSig:'';
+  PROF.syncedAt=Math.max(0,o.syncedAt|0);
 }
 function syncMoney(){
   var a=g('balNum'); if(a) a.textContent=fmtNum(PROF.ore);
@@ -1589,6 +1629,7 @@ function applyAvatar(drawable){
   PROF.avatar=data;
   saveProf(); renderMe();
   hToast('头像已更新','#4ade80');
+  syncLeaderboard(false);
 }
 function viaImg(f){
   var fr=new FileReader();
@@ -1605,10 +1646,145 @@ function pickFile(){
   var inp=g('avIn'); if(inp) inp.click();
 }
 
+/* ---------- 云端排行榜（按累计总开采量） ---------- */
+var LB_SUBMIT='/api/leaderboard';
+var LB_TOP='/api/leaderboard/top';
+var UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+var _lbLoading=false;
+
+function ensurePlayerId(){
+  if(PROF.playerId&&UUID_RE.test(PROF.playerId)) return PROF.playerId;
+  var id='';
+  try{
+    if(window.crypto&&typeof crypto.randomUUID==='function') id=crypto.randomUUID();
+  }catch(e){}
+  if(!id){
+    id='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+      var r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8);
+      return v.toString(16);
+    });
+  }
+  PROF.playerId=String(id).toLowerCase();
+  saveProf();
+  return PROF.playerId;
+}
+
+function lbAvatarSig(){
+  if(!PROF.avatar) return '';
+  return PROF.avatar.length+':'+PROF.avatar.slice(-24);
+}
+
+function setLbState(kind,text){
+  var el=g('lbState'); if(!el) return;
+  el.className='lb-state'+(kind?' '+kind:'');
+  el.textContent=text||'';
+}
+
+// 把本机档案推到云端：score 用累计总开采量（PROF.mined）
+function syncLeaderboard(force){
+  if(typeof fetch!=='function') return Promise.resolve(null);
+  var nick=(PROF.nick||'').trim();
+  if(!nick) return Promise.resolve(null);
+  var score=Math.max(0,Math.floor(PROF.mined||0));
+  if(!force&&score<=0) return Promise.resolve(null);
+  var sig=lbAvatarSig();
+  if(!force&&PROF.syncedScore===score&&PROF.syncedNick===nick&&PROF.syncedAvatarSig===sig){
+    return Promise.resolve(null);
+  }
+  var payload={
+    playerId:ensurePlayerId(),
+    nickname:nick,
+    score:score,
+    // 头像只在变化时重传，避免每次结算都往 Storage 塞一张新图
+    avatar:(sig!==PROF.syncedAvatarSig&&PROF.avatar)?PROF.avatar:null,
+    stats:{runs:PROF.runs,wins:PROF.wins,best:PROF.best,mined:PROF.mined}
+  };
+  setLbState('','同步中…');
+  return fetch(LB_SUBMIT,{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify(payload)
+  }).then(function(res){
+    return res.json().catch(function(){ return {}; }).then(function(body){
+      return {status:res.status,body:body};
+    });
+  }).then(function(r){
+    if(r.status!==201||!r.body||r.body.ok!==true){
+      var code=(r.body&&r.body.error)||('HTTP '+r.status);
+      setLbState('err',code==='rate_limited'?'同步太频繁，稍后再试':('同步失败：'+code));
+      return null;
+    }
+    PROF.syncedScore=score;
+    PROF.syncedNick=nick;
+    PROF.syncedAvatarSig=sig;
+    PROF.syncedAt=Date.now();
+    if(typeof r.body.rank==='number'&&r.body.rank>0) PROF.rank=r.body.rank;
+    saveProf();
+    setLbState('ok','已同步 · 累计 '+fmtNum(score)+' 矿'+(PROF.rank?' · 第 '+PROF.rank+' 名':''));
+    if(_tab==='me') loadLeaderboard();
+    return r.body;
+  }).catch(function(){
+    setLbState('err','同步失败：网络不可用');
+    return null;
+  });
+}
+
+function renderLb(data){
+  var list=g('lbList'); if(!list) return;
+  list.innerHTML='';
+  var entries=(data&&data.entries)||[];
+  if(!entries.length){
+    list.appendChild(el2('div','lb-empty','还没有记录，去地表挖一挖'));
+    return;
+  }
+  for(var i=0;i<entries.length;i++){
+    var e=entries[i]||{};
+    var row=el2('div','lb-row'+(e.self?' me':''));
+    row.appendChild(el2('i','lb-rk',String(e.rank||(i+1))));
+    var av=el2('span','lb-av');
+    if(e.avatarUrl){
+      av.style.backgroundImage='url("'+e.avatarUrl+'")';
+    }else{
+      av.textContent=String(e.nickname||'?').slice(0,1);
+    }
+    row.appendChild(av);
+    row.appendChild(el2('b','lb-nm',e.nickname||'无名矿工'));
+    row.appendChild(el2('em','lb-sc',fmtNum(e.score||0)));
+    list.appendChild(row);
+  }
+}
+
+function loadLeaderboard(){
+  var list=g('lbList');
+  if(!list||typeof fetch!=='function'||_lbLoading) return;
+  _lbLoading=true;
+  if(!list.children.length) list.innerHTML='<div class="lb-empty">加载中…</div>';
+  fetch(LB_TOP+'?limit=10&me='+encodeURIComponent(PROF.playerId||''),{headers:{accept:'application/json'}})
+    .then(function(res){
+      if(!res.ok) throw new Error('http_'+res.status);
+      return res.json();
+    })
+    .then(function(data){
+      if(!data||data.ok!==true) throw new Error('bad_payload');
+      renderLb(data);
+      var meta=g('lbMeta');
+      if(meta) meta.textContent='共 '+(data.total||0)+' 位矿工 · 按累计总开采量';
+      var st=g('lbState');
+      if(st&&/^(刷新中|读取排行榜失败)/.test(st.textContent)) setLbState('','');
+    })
+    .catch(function(){
+      if(list) list.innerHTML='<div class="lb-empty">排行榜暂不可用</div>';
+      setLbState('err','读取排行榜失败（离线或未部署）');
+    })
+    .then(function(){ _lbLoading=false; });
+}
+
 /* ---------- 视图切换 / 任务流转 ---------- */
 var TABS={mine:'viewMine',shop:'viewShop',me:'viewMe'};
+var _tab='mine';
 function setTab(t){
   if(!TABS[t]) return;
+  _tab=t;
   for(var k in TABS){
     var v=g(TABS[k]); if(!v) continue;
     if(k===t) v.removeAttribute('hidden'); else v.setAttribute('hidden','');
@@ -1619,7 +1795,7 @@ function setTab(t){
   }
   var body=g('homeBody'); if(body) body.scrollTop=0;
   if(t==='shop') renderShop();
-  if(t==='me') renderMe();
+  if(t==='me'){ renderMe(); loadLeaderboard(); }
 }
 function startRun(){
   g('home').className='';
@@ -1644,6 +1820,7 @@ function abandonRun(){
   PROF.runs++; PROF.mined+=p.ore;
   if(p.ore>PROF.best) PROF.best=p.ore;
   saveProf();
+  syncLeaderboard(false);
   EL.mPau.className='mask';
   state=S_MENU;
   showHome();
@@ -1699,6 +1876,7 @@ function abandonRun(){
       PROF.nick=v.slice(0,12);
       saveProf(); renderMe();
       hToast('昵称已保存','#4ade80');
+      syncLeaderboard(false);
     });
   }
   var nickIn=g('pfNick');
@@ -1710,18 +1888,26 @@ function abandonRun(){
   var wipe=g('btnWipe');
   if(wipe){
     wipe.addEventListener('click',function(){
-      var ok=window.confirm('确定清空本机存档？矿仓矿石、涂装、设计稿、昵称与头像都会丢失。');
+      var ok=window.confirm('确定清空本机存档？矿仓矿石、涂装、镐子、昵称与头像都会丢失；云端排行榜上的旧记录不会删除，但会以新的玩家身份重新开始。');
       if(!ok) return;
       try{ localStorage.removeItem(LS_KEY); }catch(e){}
       PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
-            picks:['p1'],pick:'p1',bp:{},runs:0,wins:0,mined:0,best:0};
+            picks:['p1'],pick:'p1',bp:{},runs:0,wins:0,mined:0,best:0,
+            playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0};
       renderMe(); renderShop(); syncMoney();
+      setLbState('','存档已清空');
       hToast('存档已清空','#fbbf24');
     });
   }
+
+  var lbRefresh=g('lbRefresh');
+  if(lbRefresh) lbRefresh.addEventListener('click',function(){ setLbState('','刷新中…'); loadLeaderboard(); });
+  var lbSync=g('lbSync');
+  if(lbSync) lbSync.addEventListener('click',function(){ syncLeaderboard(true); });
 })();
 
 loadProf();
+ensurePlayerId();
 renderMe();
 renderShop();
 syncMoney();

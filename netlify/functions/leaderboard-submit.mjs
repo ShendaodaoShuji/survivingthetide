@@ -1,9 +1,9 @@
 /**
  * Netlify Function · POST /api/leaderboard
  *
- * 接收玩家提交的昵称、分数、头像（可选）和统计信息：
+ * 接收玩家提交的昵称、累计分数、头像（可选）和统计信息：
  *   1. 头像（data URL）→ 上传到 Supabase Storage，拿到公开 URL；
- *   2. 记录 → 写入 public.leaderboard；
+ *   2. 记录 → upsert 到 public.leaderboard（按 playerId，一名玩家一行）；
  *   3. 返回该条记录与当前名次。
  *
  * 需要的环境变量（Netlify 站点设置 → Environment variables）：
@@ -16,11 +16,14 @@
  *
  * 请求体：
  *   {
+ *     "playerId": "0f6b…",           // 可选但建议：客户端生成并持久化的 UUID
  *     "nickname": "夜行者",          // 必填，清洗后 1–12 个字符
- *     "score": 42,                  // 必填，非负整数
+ *     "score": 1234,                // 必填，非负整数；本作里是「累计总开采量」
  *     "avatar": "data:image/jpeg;base64,...", // 可选，<=200KB，jpeg/png/webp
  *     "stats": { "runs": 12, "wins": 7, "best": 31 } // 可选，白名单数值
  *   }
+ *
+ * 带 playerId 时为 upsert：昵称/头像/统计会更新，分数只增不减（数据库触发器）。
  */
 
 const MAX_BODY_BYTES = 512 * 1024;
@@ -92,6 +95,15 @@ function cleanScore(value) {
   if (typeof n !== 'number' || !Number.isFinite(n)) return null;
   if (!Number.isInteger(n) || n < 0 || n > MAX_SCORE) return null;
   return n;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** 玩家标识：可选；给了就必须是合法 UUID */
+function parsePlayerId(value) {
+  if (value === undefined || value === null || value === '') return { ok: true, id: null };
+  if (typeof value !== 'string' || !UUID_RE.test(value)) return { ok: false, id: null };
+  return { ok: true, id: value.toLowerCase() };
 }
 
 /** 只保留白名单里的非负数值，其余丢弃 */
@@ -216,12 +228,22 @@ async function uploadAvatar(cfg, avatar) {
   return cfg.url + '/storage/v1/object/public/' + cfg.bucket + '/' + path;
 }
 
-async function insertEntry(cfg, row) {
-  const res = await fetch(cfg.url + '/rest/v1/leaderboard', {
+async function upsertEntry(cfg, row, playerId) {
+  // 有 player_id 时按 player_id upsert：一名玩家在榜上只保留一行，
+  // score 由数据库触发器保证只增不减。
+  const url =
+    cfg.url +
+    '/rest/v1/leaderboard' +
+    (playerId ? '?on_conflict=player_id' : '');
+  const prefer = playerId
+    ? 'resolution=merge-duplicates,return=representation'
+    : 'return=representation';
+
+  const res = await fetch(url, {
     method: 'POST',
     headers: sbHeaders(cfg, {
       'content-type': 'application/json',
-      prefer: 'return=representation'
+      prefer
     }),
     body: JSON.stringify(row)
   });
@@ -305,6 +327,11 @@ export default async function handler(request, context) {
   }
 
   const stats = cleanStats(body.stats);
+  const playerResult = parsePlayerId(body.playerId);
+  if (!playerResult.ok) {
+    return json(400, { ok: false, error: 'invalid_player_id' }, cors);
+  }
+  const playerId = playerResult.id;
   const cfg = sbEnv();
 
   if (!cfg.dryRun && (!cfg.url || !cfg.key)) {
@@ -329,6 +356,7 @@ export default async function handler(request, context) {
         ok: true,
         dryRun: true,
         received: {
+          playerId,
           nickname,
           score,
           stats,
@@ -360,17 +388,22 @@ export default async function handler(request, context) {
       }
     }
 
-    const entry = await insertEntry(cfg, {
+    const row = {
       nickname,
       score,
-      avatar_url: avatarUrl,
       stats,
       ip_hash: ipHash
-    });
+    };
+    if (playerId) row.player_id = playerId;
+    // 没带新头像时不覆盖已有头像（upsert 只更新 payload 里的列）
+    if (avatarUrl || !playerId) row.avatar_url = avatarUrl;
+
+    const entry = await upsertEntry(cfg, row, playerId);
+    const finalScore = entry && typeof entry.score === 'number' ? entry.score : score;
 
     let rank = null;
     try {
-      rank = await rankOf(cfg, score);
+      rank = await rankOf(cfg, finalScore);
     } catch (e) {
       console.error('leaderboard-submit: rank query failed', e.message);
     }
@@ -382,8 +415,8 @@ export default async function handler(request, context) {
         entry: {
           id: entry ? entry.id : null,
           nickname,
-          score,
-          avatar_url: avatarUrl,
+          score: finalScore,
+          avatar_url: entry && entry.avatar_url !== undefined ? entry.avatar_url : avatarUrl,
           stats,
           created_at: entry ? entry.created_at : new Date().toISOString()
         },
