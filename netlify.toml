@@ -1,0 +1,18 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# API 响应不缓存，避免排行榜提交被 CDN 缓存住
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    cache-control = "no-store"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    x-content-type-options = "nosniff"
+    referrer-policy = "strict-origin-when-cross-origin"
