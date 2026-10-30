@@ -93,6 +93,132 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
  padding:3px 7px;font:9px/1.4 monospace;color:#7a8798;z-index:22;pointer-events:none;white-space:pre}
 .err{position:absolute;left:0;right:0;bottom:0;z-index:99;background:#3a0d0d;color:#ffb4b4;
  font:10px/1.5 monospace;padding:6px;max-height:30vh;overflow:auto;white-space:pre-wrap;display:none}
+
+/* ============================================================
+   基地界面（全屏 · 非弹窗）
+   ============================================================ */
+#home{position:fixed;inset:0;z-index:55;display:none;flex-direction:column;overflow:hidden;
+ background:radial-gradient(130% 90% at 50% -12%,#2b2037 0%,#12161f 50%,#070a10 100%)}
+#home.on{display:flex}
+#homeBg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#homeBg i{position:absolute;width:240px;height:240px;border-radius:50%;filter:blur(64px)}
+#homeBg i:nth-child(1){left:-90px;top:4%;background:#ff8c4a;opacity:.4}
+#homeBg i:nth-child(2){right:-110px;top:16%;background:#9b7dff;opacity:.26}
+#homeBg i:nth-child(3){left:24%;bottom:-110px;background:#d4649a;opacity:.2}
+#homeTop{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:calc(14px + env(safe-area-inset-top,0px)) 18px 6px}
+.ht-brand{min-width:0}
+.ht-brand b{display:block;font-size:15px;font-weight:600;letter-spacing:.24em;color:#f0e6d8}
+.ht-brand em{display:block;font-style:normal;font-size:6.5px;letter-spacing:.22em;color:#7a8798;
+ margin-top:3px;white-space:nowrap}
+.ht-bal{flex:0 0 auto;display:flex;align-items:center;gap:7px;cursor:pointer;
+ background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-radius:999px;padding:6px 12px}
+.ht-bal b{font-size:15px;font-weight:600;color:#e879b8;line-height:1}
+.ht-bal i{font-style:normal;font-size:8px;letter-spacing:.14em;color:#7a8798}
+#homeBody{position:relative;z-index:2;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+ overscroll-behavior:contain;padding:2px 18px 20px}
+.hv{max-width:520px;margin:0 auto;animation:fadeUp .26s ease-out both}
+.hv[hidden]{display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.hero{padding:16px 0 8px}
+.hero h1{font-size:33px;font-weight:700;letter-spacing:.14em;color:#f0e6d8;line-height:1.1;
+ text-shadow:0 6px 26px rgba(255,140,74,.28)}
+.hero p{margin-top:9px;font-size:9px;letter-spacing:.18em;color:#8b97a8}
+.hv .brief{margin-bottom:10px}
+.hv .hts{margin-bottom:12px}
+.hint{margin:10px 2px 0;font-size:10.5px;line-height:1.7;color:#6b7789;text-align:center}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0 10px;
+ font-size:15px;font-weight:600;letter-spacing:.16em;color:#f0e6d8}
+.sec-h span{font-size:9px;font-weight:400;letter-spacing:.06em;color:#6b7789}
+.subtabs{display:flex;gap:8px;margin-bottom:12px}
+.subtabs .st{flex:1;padding:9px 0;border-radius:9px;font-family:inherit;font-size:12px;letter-spacing:.1em;
+ background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#8b97a8;cursor:pointer}
+.subtabs .st.on{background:rgba(255,140,74,.16);border-color:rgba(255,140,74,.55);color:#ffb98a;font-weight:600}
+#shopGrid{display:grid;gap:9px}
+.item2{display:flex;align-items:center;gap:11px;padding:11px;border-radius:12px;
+ background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}
+.item2 .sw{flex:0 0 auto;width:50px;height:50px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
+ display:flex;align-items:center;justify-content:center;font-size:23px;background:rgba(255,255,255,.04)}
+.item2 .c2m{flex:1;min-width:0}
+.item2 .c2m b{display:block;font-size:12.5px;font-weight:600;color:#eef0ea}
+.item2 .c2m span{display:block;margin-top:3px;font-size:10px;line-height:1.55;color:#8b97a8}
+.item2 .c2b{flex:0 0 auto;min-width:72px;padding:9px 11px;border-radius:9px;border:1px solid transparent;
+ font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;
+ background:linear-gradient(135deg,#ff8c4a,#ff6f2c);color:#1a0d05}
+.item2 .c2b:active{transform:scale(.96)}
+.item2 .c2b:disabled{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);
+ color:#7a8798;cursor:default}
+.item2 .c2b.own{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.4);color:#4ade80}
+.item2 .c2b.eq{background:rgba(155,125,255,.14);border-color:rgba(155,125,255,.45);color:#c4b5fd}
+.pf{display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;margin-bottom:11px;
+ background:linear-gradient(135deg,rgba(255,140,74,.13),rgba(155,125,255,.1));
+ border:1px solid rgba(255,255,255,.11)}
+.pfAvWrap{position:relative;flex:0 0 auto;width:74px;height:74px}
+.pfAv{display:flex;align-items:center;justify-content:center;width:74px;height:74px;border-radius:50%;
+ overflow:hidden;cursor:pointer;border:2px solid rgba(255,140,74,.6);background:rgba(255,255,255,.06) center/cover no-repeat}
+.pfAv .ini{font-size:27px;font-weight:600;color:#ffb98a}
+.pfCam{position:absolute;right:-3px;bottom:-3px;width:24px;height:24px;border-radius:50%;
+ background:#ff8c4a;color:#1a0d05;font-size:11px;display:flex;align-items:center;justify-content:center;
+ border:2px solid #10141c;pointer-events:none}
+.pfMeta{flex:1;min-width:0}
+.pfMeta b{display:block;font-size:16px;color:#f0e6d8;font-weight:600;letter-spacing:.04em;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfMeta span{display:block;margin-top:5px;font-size:9.5px;letter-spacing:.1em;color:#8b97a8}
+.wealth{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:14px;
+ margin-bottom:10px;background:linear-gradient(135deg,rgba(232,121,184,.17),rgba(155,125,255,.12));
+ border:1px solid rgba(232,121,184,.32)}
+.wealthL span{display:block;font-size:8.5px;letter-spacing:.18em;color:#8b97a8;margin-bottom:7px}
+.wealthL b{display:block;font:600 27px/1 ui-monospace,monospace;color:#f0e6d8}
+.wealthL b em{font-style:normal;font-size:11px;color:#e879b8;margin-left:6px;letter-spacing:.1em}
+.wealthR{text-align:right;font-size:9.5px;line-height:1.9;color:#8b97a8}
+.wealthR b{color:#eef0ea;font-weight:600}
+.field{padding:11px 12px;border-radius:12px;margin-bottom:9px;
+ background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}
+.field>label{display:block;font-size:8px;letter-spacing:.16em;color:#7a8798;margin-bottom:7px}
+.field .row{display:flex;gap:8px}
+.field input{flex:1;min-width:0;padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;
+ color:#eef0ea;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.12);outline:none}
+.field input:focus{border-color:#ff8c4a}
+.sbtn{flex:0 0 auto;padding:0 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;
+ cursor:pointer;background:rgba(255,140,74,.16);border:1px solid rgba(255,140,74,.45);color:#ffb98a}
+.sbtn:active{transform:scale(.97)}
+.pstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.pstats div{padding:10px 8px;border-radius:10px;text-align:center;
+ background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.pstats i{display:block;font-style:normal;font-size:8px;letter-spacing:.1em;color:#7a8798}
+.pstats b{display:block;margin-top:4px;font-size:16px;font-weight:500;color:#eef0ea}
+#tabbar{position:relative;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);
+ background:rgba(9,13,19,.96);border-top:1px solid rgba(255,255,255,.1);
+ padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(12px)}
+.tb{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;
+ padding:6px 0;background:none;border:none;font-family:inherit;font-size:10px;letter-spacing:.14em;
+ color:#6b7789;cursor:pointer;transition:color .16s}
+.tb u{font-size:19px;line-height:1;text-decoration:none;filter:grayscale(.7);opacity:.85;transition:.16s}
+.tb b{font-weight:500}
+.tb.on{color:#ff8c4a}
+.tb.on u{filter:none;opacity:1;transform:translateY(-1px)}
+.tb.on::before{content:'';position:absolute;top:-7px;left:50%;width:24px;height:2px;margin-left:-12px;
+ border-radius:2px;background:#ff8c4a;box-shadow:0 0 10px rgba(255,140,74,.8)}
+#hToast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:75;
+ transform:translate(-50%,10px);opacity:0;pointer-events:none;white-space:nowrap;
+ padding:9px 16px;border-radius:999px;font-size:12px;color:#fff;
+ background:rgba(20,27,38,.96);border:1px solid rgba(255,255,255,.16);
+ box-shadow:0 8px 24px rgba(0,0,0,.5);transition:opacity .22s,transform .22s}
+#hToast.on{opacity:1;transform:translate(-50%,0)}
+.bankline{margin:0 0 12px;padding:10px 12px;border-radius:9px;font-size:11px;line-height:1.6;text-align:left;
+ background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.28);color:#a7f3c0}
+.bankline.lose{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.28);color:#fca5a5}
+.bankline b{color:#fff}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#b6bfcd;
+ font-weight:400;margin-top:8px}
+@media (max-width:370px){
+  .ht-brand em{display:none}
+  .hero h1{font-size:29px}
+  .hero p{font-size:8px;letter-spacing:.14em}
+  .item2 .c2b{min-width:64px;font-size:10.5px;padding:8px 9px}
+  .item2 .sw{width:44px;height:44px}
+  .sec-h{font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -128,25 +254,104 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
   <div class="ab o2" id="bO2"><em id="o2N" style="display:none">0</em><u>🫧</u><b>氧气</b></div>
   <div class="ab" id="bPau"><u>⏸</u><b>暂停</b></div>
 </div>
-<div class="mask on" id="mIntro"><div class="card">
-  <div class="brand">无烬冬日</div>
-  <div class="brand-en">A LONG WINTER WITHOUT EMBERS</div>
-  <h1>潮汐求生</h1>
-  <div class="brief">
-    你是<b>迦太基-7</b>的萤火级矿工，今天轮到你外出采集源能矿。<br><br>
-    <span class="v">◆ 目标</span>：采集 <b>20 颗</b>源能矿，返回撤离点<br>
-    <span class="t">⚡ 潮汐</span>：有<b>来向</b>，会持续扣血<br>
-    <span class="c">🛡 掩体</span>：躲到潮汐来向的<b>背面</b>（残墙后）伤害大减<br>
-    <span class="c">◉ 氧气</span>：行动缓慢耗氧，冲刺更快，<b>氧气罐</b>可补充
-  </div>
-  <div class="hts">
-    <div class="ht"><b>WASD / 方向键</b><span>电脑端移动</span></div>
-    <div class="ht"><b>⛏ 采集</b><span>点按采矿，拿到枪后长按连射</span></div>
-    <div class="ht"><b>⚡ 冲刺</b><span>爆发加速 · 3 格充能自动恢复</span></div>
-    <div class="ht"><b>🫧 氧气罐</b><span>地表拾取，随时补充 +45%</span></div>
-  </div>
-  <button class="btn" id="btnGo">开始任务</button>
-</div></div>
+<div id="home" class="on">
+  <div id="homeBg"><i></i><i></i><i></i></div>
+  <header id="homeTop">
+    <div class="ht-brand"><b>无烬冬日</b><em>A LONG WINTER WITHOUT EMBERS</em></div>
+    <div class="ht-bal" id="homeBal"><b id="balNum">0</b><i>矿仓</i></div>
+  </header>
+  <main id="homeBody">
+
+    <section class="hv" id="viewMine">
+      <div class="hero">
+        <h1>潮汐求生</h1>
+        <p>迦太基-7 · 萤火级矿工 · 第 7 轮地表采集</p>
+      </div>
+      <div class="brief">
+        你是<b>迦太基-7</b>的萤火级矿工，今天轮到你外出采集源能矿。<br><br>
+        <span class="v">◆ 目标</span>：采集 <b>20 颗</b>源能矿，返回撤离点<br>
+        <span class="t">⚡ 潮汐</span>：有<b>来向</b>，会持续扣血<br>
+        <span class="c">🛡 掩体</span>：躲到潮汐来向的<b>背面</b>（残墙后）伤害大减<br>
+        <span class="c">◉ 氧气</span>：行动缓慢耗氧，冲刺更快，<b>氧气罐</b>可补充
+      </div>
+      <div class="hts">
+        <div class="ht"><b>WASD / 方向键</b><span>电脑端移动</span></div>
+        <div class="ht"><b>⛏ 采集</b><span>点按采矿，拿到枪后长按连射</span></div>
+        <div class="ht"><b>⚡ 冲刺</b><span>爆发加速 · 3 格充能自动恢复</span></div>
+        <div class="ht"><b>🫧 氧气罐</b><span>地表拾取，随时补充 +45%</span></div>
+      </div>
+      <button class="btn" id="btnGo">开始任务</button>
+      <p class="hint">撤离成功要上交 20 矿，超出的部分才进矿仓；撤离失败则矿石全部遗失。</p>
+    </section>
+
+    <section class="hv" id="viewShop" hidden>
+      <div class="sec-h">商城 <span>使用矿仓中的源能矿兑换</span></div>
+      <div class="subtabs">
+        <button class="st on" data-cat="skin">涂装</button>
+        <button class="st" data-cat="pick">镐子</button>
+        <button class="st" data-cat="bp">武器</button>
+      </div>
+      <div id="shopGrid"></div>
+      <p class="hint" id="shopHint"></p>
+    </section>
+
+    <section class="hv" id="viewMe" hidden>
+      <div class="sec-h">我的 <span>矿工档案</span></div>
+      <div class="pf">
+        <div class="pfAvWrap">
+          <label class="pfAv" id="pfAv" for="avIn"><span class="ini" id="pfIni">矿</span></label>
+          <span class="pfCam">📷</span>
+        </div>
+        <input type="file" id="avIn" accept="image/*" hidden>
+        <div class="pfMeta">
+          <b id="pfName">无名矿工</b>
+          <span>迦太基-7 · 萤火级 · 工号 0042</span>
+        </div>
+      </div>
+
+      <div class="wealth">
+        <div class="wealthL">
+          <span>矿石余额 · ORE BALANCE</span>
+          <b><span id="pfOreN">0</span><em>矿</em></b>
+        </div>
+        <div class="wealthR">
+          累计采集 <b id="pfMined">0</b><br>
+          单次最高 <b id="pfBest">0</b><br>
+          镐子 <b id="pfPickNm">拾荒镐</b>
+        </div>
+      </div>
+
+      <div class="pstats">
+        <div><i>出动次数</i><b id="pfRuns">0</b></div>
+        <div><i>成功撤离</i><b id="pfWins">0</b></div>
+        <div><i>当前涂装</i><b id="pfSkinNm" style="font-size:10px;line-height:1.4">熔橙</b></div>
+      </div>
+
+      <div class="field">
+        <label>昵称 · NICKNAME</label>
+        <div class="row">
+          <input id="pfNick" maxlength="12" placeholder="输入你的矿工代号">
+          <button class="sbtn" id="pfSave">保存</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>头像 · AVATAR</label>
+        <div class="row">
+          <button class="sbtn" id="pfAvBtn" style="width:100%;padding:10px 0">上传 / 更换头像</button>
+        </div>
+      </div>
+      <p class="hint">头像与昵称只保存在本机浏览器中，不会上传到任何服务器。</p>
+      <button class="btn ghost" id="btnWipe">清空本机存档</button>
+    </section>
+
+  </main>
+  <nav id="tabbar">
+    <button class="tb on" data-tab="mine"><u>⛏</u><b>采集</b></button>
+    <button class="tb" data-tab="shop"><u>🛒</u><b>商城</b></button>
+    <button class="tb" data-tab="me"><u>👤</u><b>我的</b></button>
+  </nav>
+</div>
+<div id="hToast"></div>
 <div class="mask" id="mEnd"><div class="card">
   <h1 id="endT">任务完成</h1>
   <div class="stats">
@@ -155,12 +360,15 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
     <div class="st"><i>击杀</i><b id="eKill">0</b></div>
     <div class="st"><i>扛过潮汐</i><b id="eTide">0</b></div>
   </div>
+  <div class="bankline" id="eBank"></div>
   <button class="btn" id="btnRe">再来一次</button>
+  <button class="btn ghost" id="btnHomeE">返回基地</button>
 </div></div>
 <div class="mask" id="mPau"><div class="card">
   <h1 style="color:#d08a4e">已暂停</h1>
   <div class="brief" id="pauTxt"></div>
   <button class="btn" id="btnRes">继续</button>
+  <button class="btn ghost" id="btnHomeP">放弃并返回基地</button>
 </div></div>
 <div id="diag">--</div>
 <div class="err" id="err"></div>
@@ -205,9 +413,10 @@ var EL={
   bSpr:g('bSpr'),sprN:g('sprN'), bAct:g('bAct'),actN:g('actN'),
   bWpn:g('bWpn'),wpnIc:g('wpnIc'),wpnNm:g('wpnNm'),
   bO2:g('bO2'),o2N:g('o2N'), bPau:g('bPau'),
-  mIntro:g('mIntro'),mEnd:g('mEnd'),mPau:g('mPau'),
-  endT:g('endT'),eOre:g('eOre'),eTime:g('eTime'),eKill:g('eKill'),eTide:g('eTide'),
-  pauTxt:g('pauTxt'),btnGo:g('btnGo'),btnRe:g('btnRe'),btnRes:g('btnRes'),diag:g('diag')
+  mEnd:g('mEnd'),mPau:g('mPau'),
+  endT:g('endT'),eOre:g('eOre'),eTime:g('eTime'),eKill:g('eKill'),eTide:g('eTide'),eBank:g('eBank'),
+  pauTxt:g('pauTxt'),btnGo:g('btnGo'),btnRe:g('btnRe'),btnRes:g('btnRes'),diag:g('diag'),
+  btnHomeE:g('btnHomeE'),btnHomeP:g('btnHomeP')
 };
 var VW=0,VH=0;
 var S_MENU=0,S_PLAY=1,S_PAUSE=2,S_END=3;
@@ -254,6 +463,10 @@ function init(){
   tDir=Math.random()*6.283;nDir=Math.random()*6.283;cover=false;
   joy.on=false;joy.x=0;joy.y=0;holdT=0;actCd=0;
   unlocked={pick:1};
+  // 武器设计稿：永久解锁的开局装备
+  if(PROF.bp.pistol) unlocked.pistol=1;
+  if(PROF.bp.rifle)  unlocked.rifle=1;
+  p.weapon = unlocked.rifle ? 'rifle' : (unlocked.pistol ? 'pistol' : 'pick');
   pendingSpawns=0; spawnTimer=0;
   cam.sh=0;
   var VDEF=[
@@ -435,9 +648,11 @@ bindBtn(EL.bAct,function(){ doAct(); });
 bindBtn(EL.bWpn,function(){ cycleWeapon(); },null,true);
 bindBtn(EL.bO2,function(){ useTank(); },null,true);
 EL.bPau.addEventListener('click',pause);
-EL.btnGo.addEventListener('click',function(){ EL.mIntro.className='mask'; init(); state=S_PLAY; });
-EL.btnRe.addEventListener('click',function(){ EL.mEnd.className='mask'; init(); state=S_PLAY; });
+EL.btnGo.addEventListener('click',startRun);
+EL.btnRe.addEventListener('click',startRun);
 EL.btnRes.addEventListener('click',pause);
+EL.btnHomeE.addEventListener('click',goHomeFromEnd);
+EL.btnHomeP.addEventListener('click',abandonRun);
 function syncSpr(){
   EL.sprN.textContent=p.sCh;
   var sc='ab spr'+(p.sOn?' on':'')+(p.sCh<=0?' off':'');
@@ -481,8 +696,10 @@ function doMine(){
     if(d<v.r+34 && d<bd){bd=d;best=v;}
   }
   if(!best){ return; }
-  best.hp--; p.mAnim=0.22;
-  for(var j=0;j<3;j++) addP({x:best.x,y:best.y,vx:rnd(-1.5,1.5),vy:rnd(-2,-.5),life:22,c:'#d4649a',s:2});
+  // 镐子：单击视为 N 次有效开采（1/3/5/7/9）
+  var hits=pickHits();
+  best.hp-=hits; p.mAnim=0.22;
+  for(var j=0;j<3+Math.min(6,hits);j++) addP({x:best.x,y:best.y,vx:rnd(-1.5,1.5),vy:rnd(-2,-.5),life:22,c:'#d4649a',s:2});
   if(best.hp<=0){
     best.dead=1;
     p.ore += best.yield;
@@ -513,16 +730,28 @@ function useTank(){
 function pause(){
   if(state===S_PLAY){
     state=S_PAUSE;
-    EL.pauTxt.innerHTML='源能矿 <b>'+p.ore+'</b> / '+ORE_GOAL+'<br>生命 <b>'+Math.round(p.hp)+'</b><br>氧气 <b>'+Math.round(p.oxy)+'%</b><br>氧气罐 <b>'+p.tanks+'</b><br>存活 <b>'+Math.floor(gtime)+'</b> 秒';
+    EL.pauTxt.innerHTML='源能矿 <b>'+p.ore+'</b> / '+ORE_GOAL+'<br>生命 <b>'+Math.round(p.hp)+'</b><br>氧气 <b>'+Math.round(p.oxy)+'%</b><br>氧气罐 <b>'+p.tanks+'</b><br>存活 <b>'+Math.floor(gtime)+'</b> 秒<br>矿仓余额 <b>'+PROF.ore+'</b>';
     EL.mPau.className='mask on';
   } else if(state===S_PAUSE){ state=S_PLAY; EL.mPau.className='mask'; }
 }
 function end(win){
   state=S_END;
+  // 矿仓结算：撤离成功需上交 20 矿，只有超出的部分入仓；失败/放弃则全部遗失
+  var gain = win ? Math.max(0, p.ore-ORE_GOAL) : 0;
+  PROF.ore += gain;
+  PROF.runs++;
+  if(win) PROF.wins++;
+  PROF.mined += p.ore;
+  if(p.ore>PROF.best) PROF.best=p.ore;
+  saveProf();
   EL.endT.textContent=win?'任务完成':'任务失败';
   EL.endT.style.color=win?'#4ade80':'#ef4444';
   EL.eOre.textContent=p.ore; EL.eTime.textContent=Math.floor(gtime)+'s';
   EL.eKill.textContent=p.kills; EL.eTide.textContent=nTide;
+  EL.eBank.className='bankline'+(win?'':' lose');
+  EL.eBank.innerHTML = win
+    ? '◆ 撤离成功 · 上交 <b>'+ORE_GOAL+'</b> 矿，矿仓 <b>+'+gain+'</b>，当前余额 <b>'+PROF.ore+'</b>'
+    : '◆ 撤离失败 · 矿石全部遗失，矿仓未增加（当前余额 <b>'+PROF.ore+'</b>）';
   EL.mEnd.className='mask on';
 }
 function hurt(n,sx,sy){
@@ -732,7 +961,7 @@ function syncWpn(){
   var w=WPN[p.weapon];
   EL.actN.textContent = w.melee?'采集':'开火';
   EL.wpnIc.textContent = p.weapon==='pick'?'⛏':(p.weapon==='pistol'?'🔫':'⚡');
-  EL.wpnNm.textContent = w.nm;
+  EL.wpnNm.textContent = w.melee ? (w.nm+' ×'+pickHits()) : w.nm;
   EL.bWpn.className = 'ab wpn';
 }
 function cycleWeapon(){
@@ -944,6 +1173,9 @@ function rr(x,y,w,h,r){
 }
 function drawPlayer(){
   var fl=p.hurt>0;
+  var S=curSkin();
+  var bodyC=fl?'#fff':(tOn?S.bodyT:S.bodyN);
+  var secC=fl?'#fff':(tOn?(S.secT||S.bodyT):(S.secN||S.bodyN));
   cx.save();cx.translate(p.x,p.y);
   cx.fillStyle='rgba(0,0,0,.35)';
   cx.beginPath();cx.ellipse(0,13,13,5,0,0,6.283);cx.fill();
@@ -957,23 +1189,23 @@ function drawPlayer(){
   var st1=Math.sin(p.walkT)*2.6*p.walkA;
   cx.fillStyle='#1f2937'; cx.fillRect(-4,-11+st1,12,6);
   cx.fillStyle='#2a3445'; cx.fillRect(-4,5+st1,12,6);
-  cx.fillStyle=fl?'#fff':(tOn?'#e05a8a':'#ff8c4a');
+  cx.fillStyle=bodyC;
   rr(-12,-10,24,20,6);cx.fill();
   var rig = Math.sin(p.walkT*1.5)*3.6*p.walkA
           + (p.mAnim>0 ? Math.sin((1-p.mAnim/.22)*Math.PI)*3.2 : 0);
-  cx.fillStyle='rgba(0,0,0,.28)';rr(-8+rig,-3,16,5,2);cx.fill();
-  cx.fillStyle=fl?'#fff':(tOn?'#e05a8a':'#ff8c4a');
+  cx.fillStyle=fl?'#fff':(S.mix?secC:'rgba(0,0,0,.28)');rr(-8+rig,-3,16,5,2);cx.fill();
+  cx.fillStyle=bodyC;
   rr(-13,-11,7,7,2);cx.fill();rr(6,-11,7,7,2);cx.fill();
   cx.save();cx.translate(2,0);
-  cx.fillStyle=fl?'#fff':'#e8e8e0';cx.beginPath();cx.arc(0,0,9,0,6.283);cx.fill();
-  cx.fillStyle=tOn?'#9b7dff':'#1a2230';rr(3,-5,5,10,2);cx.fill();
-  cx.fillStyle=tOn?'rgba(155,109,255,.7)':'rgba(120,200,255,.55)';rr(4,-3,2,6,1);cx.fill();
+  cx.fillStyle=fl?'#fff':(tOn?S.headT:S.headN);cx.beginPath();cx.arc(0,0,9,0,6.283);cx.fill();
+  cx.fillStyle=tOn?S.visT:S.visN;rr(3,-5,5,10,2);cx.fill();
+  cx.fillStyle=tOn?S.glowT:S.glow;rr(4,-3,2,6,1);cx.fill();
   cx.restore();
   cx.save();
   if(melee){
     cx.rotate(-mi*1.1);
     cx.fillStyle='#8b5a2b';cx.fillRect(8,-2,26,5);
-    cx.save();cx.translate(34,0);cx.rotate(.7);cx.fillStyle='#c9d1d9';cx.fillRect(-2,-2,16,5);cx.restore();
+    cx.save();cx.translate(34,0);cx.rotate(.7);cx.fillStyle=S.acc;cx.fillRect(-2,-2,16,5);cx.restore();
   }else{
     cx.rotate(-sw*.28);
     if(p.weapon==='pistol'){
@@ -990,7 +1222,7 @@ function drawPlayer(){
       cx.beginPath();cx.moveTo(mx2,0);cx.lineTo(mx2+12,-6);cx.lineTo(mx2+16,0);cx.lineTo(mx2+12,6);cx.closePath();cx.fill();}
   }
   cx.restore();
-  cx.save();cx.rotate(sw*.6+rig*0.012);cx.fillStyle='#33404f';rr(1,-8,13,6,3);cx.fill();cx.restore();
+  cx.save();cx.rotate(sw*.6+rig*0.012);cx.fillStyle=fl?'#fff':(S.mix?secC:'#33404f');rr(1,-8,13,6,3);cx.fill();cx.restore();
   cx.restore();
   if(p.inv>0&&Math.floor(gtime*14)%2===0){
     cx.strokeStyle='rgba(255,255,255,.5)';cx.lineWidth=2;
@@ -1074,6 +1306,426 @@ function loop(t){
   render(dt);
   _raf=requestAnimationFrame(loop);
 }
+/* ============================================================
+   矿工档案 · 矿仓 · 商城（localStorage 本地存档）
+   ============================================================ */
+var LS_KEY='wt_save_v1';
+var SKINS=[
+  {id:'ember', nm:'熔橙·迦太基色', price:0, mix:false,
+   ds:'迦太基-7 的标准配发色，橙得像一簇将熄未熄的余烬。',
+   bodyN:'#ff8c4a', bodyT:'#e05a8a', headN:'#e8e8e0', headT:'#e8e0ee',
+   visN:'#1a2230', visT:'#9b7dff', glow:'rgba(120,200,255,.55)', glowT:'rgba(155,109,255,.7)', acc:'#c9d1d9'},
+  {id:'oasis', nm:'轻绿·绿洲同盟', price:60, mix:false,
+   ds:'绿洲同盟的补给涂装，浅绿外壳在盐碱地上反而最显眼。',
+   bodyN:'#4ade80', bodyT:'#22d3ee', headN:'#e9fbf1', headT:'#ccfbf1',
+   visN:'#052e22', visT:'#5eead4', glow:'rgba(74,222,128,.55)', glowT:'rgba(45,212,191,.7)', acc:'#bbf7d0'},
+  {id:'rust', nm:'血锈·铁锈地带', price:120, mix:false,
+   ds:'铁锈地带淘来的旧涂装，干涸的血色和铁锈几乎分不清。',
+   bodyN:'#ef4444', bodyT:'#f97316', headN:'#fecaca', headT:'#fed7aa',
+   visN:'#2a0a0a', visT:'#fb923c', glow:'rgba(249,115,22,.6)', glowT:'rgba(251,146,60,.7)', acc:'#fca5a5'},
+  {id:'resonance', nm:'共鸣·萤火虫', price:240, mix:true,
+   ds:'橙灰混色。仿生萤火虫的鞘翅与腹部：橙是信号，灰是它藏身的夜。',
+   bodyN:'#f59e0b', bodyT:'#22d3ee', secN:'#94a3b8', secT:'#64748b',
+   headN:'#cbd5e1', headT:'#94a3b8',
+   visN:'#1f2937', visT:'#fbbf24', glow:'rgba(251,191,36,.65)', glowT:'rgba(34,211,238,.7)', acc:'#e2e8f0'},
+  {id:'reverb', nm:'混响·记忆体', price:360, mix:true,
+   ds:'紫蓝混色。像一段被反复回放的记忆，每次潮汐都在改写它。',
+   bodyN:'#a78bfa', bodyT:'#f0abfc', secN:'#3b82f6', secT:'#6366f1',
+   headN:'#c7d2fe', headT:'#ddd6fe',
+   visN:'#1e1b4b', visT:'#e879f9', glow:'rgba(167,139,250,.6)', glowT:'rgba(232,121,249,.7)', acc:'#bfdbfe'}
+];
+// 单击视为有效开采次数：1 / 3 / 5 / 7 / 9
+var PICKS=[
+  {id:'p1', nm:'拾荒镐', hits:1, price:0,
+   ds:'矿务局配发的旧镐。单击视为 1 次有效开采。'},
+  {id:'p3', nm:'工兵镐', hits:3, price:60,
+   ds:'三齿并进。单击视为 3 次有效开采。'},
+  {id:'p5', nm:'深掘镐', hits:5, price:120,
+   ds:'加重镐头，一次落点砸出五道裂口。单击视为 5 次有效开采。'},
+  {id:'p7', nm:'裂岩镐', hits:7, price:240,
+   ds:'液压驱动的七齿镐，岩层在它面前像冻住的泥。单击视为 7 次有效开采。'},
+  {id:'p9', nm:'潮切镐', hits:9, price:360,
+   ds:'用潮汐残片锻成的九齿镐，落一次，整条矿脉都在回响。单击视为 9 次有效开采。'}
+];
+var BPS=[
+  {id:'pistol', nm:'手枪设计稿', price:60, icon:'🔫',
+   ds:'开局即可携带「手枪」，不必再冒险去翻地表的武器箱。'},
+  {id:'rifle', nm:'磁轨步枪设计稿', price:300, icon:'⚡',
+   ds:'开局即可携带「磁轨步枪」，高射速与高穿透，正面压制无人机。'}
+];
+var PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
+          picks:['p1'],pick:'p1',bp:{},
+          runs:0,wins:0,mined:0,best:0};
+function skinOf(id){
+  for(var i=0;i<SKINS.length;i++) if(SKINS[i].id===id) return SKINS[i];
+  return SKINS[0];
+}
+function pickOf(id){
+  for(var i=0;i<PICKS.length;i++) if(PICKS[i].id===id) return PICKS[i];
+  return PICKS[0];
+}
+function pickHits(){ return pickOf(PROF.pick).hits; }
+function curSkin(){ return skinOf(PROF.skin); }
+function fmtNum(n){
+  n=Math.max(0,Math.floor(n||0));
+  return n>=10000 ? (n/1000).toFixed(1)+'k' : String(n);
+}
+var _htT=null;
+function hToast(msg,col){
+  var el=g('hToast'); if(!el) return;
+  el.textContent=msg; el.style.color=col||'#fff'; el.className='on';
+  if(_htT) clearTimeout(_htT);
+  _htT=setTimeout(function(){ el.className=''; },1900);
+}
+function saveProf(){
+  try{ localStorage.setItem(LS_KEY,JSON.stringify(PROF)); }
+  catch(e){ hToast('存档写入失败：本地存储空间不足','#ef4444'); }
+}
+function loadProf(){
+  var raw=null;
+  try{ raw=localStorage.getItem(LS_KEY); }catch(e){ return; }
+  if(!raw) return;
+  var o=null;
+  try{ o=JSON.parse(raw); }catch(e){ return; }
+  if(!o||typeof o!=='object') return;
+  if(typeof o.nick==='string'&&o.nick.trim()) PROF.nick=o.nick.trim().slice(0,12);
+  if(typeof o.avatar==='string'&&o.avatar.indexOf('data:image/')===0) PROF.avatar=o.avatar;
+  PROF.ore=Math.max(0,Math.floor(o.ore||0));
+  if(Object.prototype.toString.call(o.skins)==='[object Array]'){
+    for(var i=0;i<o.skins.length;i++){
+      var sid=o.skins[i];
+      if(skinOf(sid).id===sid && PROF.skins.indexOf(sid)<0) PROF.skins.push(sid);
+    }
+  }
+  if(PROF.skins.indexOf('ember')<0) PROF.skins.unshift('ember');
+  PROF.skin=skinOf(o.skin).id;
+  if(Object.prototype.toString.call(o.picks)==='[object Array]'){
+    for(var pi=0;pi<o.picks.length;pi++){
+      var pid=o.picks[pi];
+      if(pickOf(pid).id===pid && PROF.picks.indexOf(pid)<0) PROF.picks.push(pid);
+    }
+  }
+  if(PROF.picks.indexOf('p1')<0) PROF.picks.unshift('p1');
+  PROF.pick=pickOf(o.pick).id;
+  if(o.bp&&typeof o.bp==='object'){
+    for(var k in o.bp){ if(o.bp[k]) PROF.bp[k]=1; }
+  }
+  PROF.runs=Math.max(0,o.runs|0); PROF.wins=Math.max(0,o.wins|0);
+  PROF.mined=Math.max(0,o.mined|0); PROF.best=Math.max(0,o.best|0);
+}
+function syncMoney(){
+  var a=g('balNum'); if(a) a.textContent=fmtNum(PROF.ore);
+  var b=g('pfOreN'); if(b) b.textContent=fmtNum(PROF.ore);
+}
+
+/* ---------- 商城 ---------- */
+var shopCat='skin';
+function el2(tag,cls,txt){
+  var e=document.createElement(tag);
+  if(cls) e.className=cls;
+  if(txt!==undefined&&txt!==null) e.textContent=txt;
+  return e;
+}
+function buildRow(sw,nm,ds,btn){
+  var row=el2('div','item2');
+  row.appendChild(sw);
+  var mid=el2('div','c2m');
+  mid.appendChild(el2('b',null,nm));
+  mid.appendChild(el2('span',null,ds));
+  row.appendChild(mid);
+  row.appendChild(btn);
+  return row;
+}
+function skinRow(sk){
+  var sw=el2('div','sw');
+  if(sk.mix){
+    sw.style.background='linear-gradient(135deg,'+sk.bodyN+' 0%,'+sk.bodyN+' 46%,'+sk.secN+' 54%,'+sk.secN+' 100%)';
+  }else{
+    sw.style.background=sk.bodyN;
+    sw.style.boxShadow='inset 0 0 0 1px rgba(255,255,255,.18),inset 0 -10px 16px rgba(0,0,0,.22)';
+  }
+  var owned=PROF.skins.indexOf(sk.id)>=0;
+  var btn=el2('button','c2b');
+  if(owned&&PROF.skin===sk.id){
+    btn.className='c2b eq'; btn.textContent='已装备'; btn.disabled=true;
+  }else if(owned){
+    btn.className='c2b eq'; btn.textContent='装备';
+    btn.addEventListener('click',function(){
+      PROF.skin=sk.id; saveProf(); renderShop(); renderMe();
+      hToast('已装备「'+sk.nm+'」','#c4b5fd');
+    });
+  }else{
+    btn.textContent=sk.price+' 矿';
+    if(PROF.ore<sk.price) btn.style.opacity='.62';
+    btn.addEventListener('click',function(){ buySkin(sk); });
+  }
+  return buildRow(sw,sk.nm,sk.ds,btn);
+}
+function pickRow(pk){
+  var sw=el2('div','sw');
+  sw.style.flexDirection='column';
+  sw.style.gap='0px';
+  var ic=el2('span',null,'⛏');
+  ic.style.fontSize='17px'; ic.style.lineHeight='1';
+  var lab=el2('span',null,'×'+pk.hits);
+  lab.style.fontSize='9px'; lab.style.lineHeight='1.3'; lab.style.color='#c4b5fd'; lab.style.letterSpacing='.04em';
+  sw.appendChild(ic); sw.appendChild(lab);
+  var owned=PROF.picks.indexOf(pk.id)>=0;
+  var btn=el2('button','c2b');
+  if(owned&&PROF.pick===pk.id){
+    btn.className='c2b eq'; btn.textContent='已装备'; btn.disabled=true;
+  }else if(owned){
+    btn.className='c2b eq'; btn.textContent='装备';
+    btn.addEventListener('click',function(){
+      PROF.pick=pk.id; saveProf(); syncMoney(); renderShop(); renderMe();
+      hToast('已装备「'+pk.nm+'」· 单击 '+pk.hits+' 次开采','#c4b5fd');
+    });
+  }else{
+    btn.textContent=pk.price+' 矿';
+    if(PROF.ore<pk.price) btn.style.opacity='.62';
+    btn.addEventListener('click',function(){ buyPick(pk); });
+  }
+  return buildRow(sw,pk.nm,pk.ds,btn);
+}
+function bpRow(bp){
+  var sw=el2('div','sw',bp.icon);
+  var btn=el2('button','c2b');
+  if(PROF.bp[bp.id]){
+    btn.className='c2b own'; btn.textContent='已拥有'; btn.disabled=true;
+  }else{
+    btn.textContent=bp.price+' 矿';
+    if(PROF.ore<bp.price) btn.style.opacity='.62';
+    btn.addEventListener('click',function(){ buyBp(bp); });
+  }
+  return buildRow(sw,bp.nm,bp.ds,btn);
+}
+function renderShop(){
+  var grid=g('shopGrid'); if(!grid) return;
+  grid.innerHTML='';
+  var hint=g('shopHint');
+  if(shopCat==='skin'){
+    for(var i=0;i<SKINS.length;i++) grid.appendChild(skinRow(SKINS[i]));
+    if(hint) hint.textContent='涂装改变你在矿区的机体配色，购买后自动装备，随时可切换。';
+  }else if(shopCat==='pick'){
+    for(var p=0;p<PICKS.length;p++) grid.appendChild(pickRow(PICKS[p]));
+    if(hint) hint.textContent='镐子决定「单击」的采矿效率：单击视为 1 / 3 / 5 / 7 / 9 次有效开采。';
+  }else{
+    for(var j=0;j<BPS.length;j++) grid.appendChild(bpRow(BPS[j]));
+    if(hint) hint.textContent='武器设计稿为永久解锁，购买后每次出动都会自动携带。';
+  }
+}
+function buySkin(sk){
+  if(PROF.skins.indexOf(sk.id)>=0) return;
+  if(PROF.ore<sk.price){
+    hToast('矿仓不足，还差 '+(sk.price-PROF.ore)+' 矿','#ef4444'); return;
+  }
+  PROF.ore-=sk.price;
+  PROF.skins.push(sk.id);
+  PROF.skin=sk.id;
+  saveProf(); syncMoney(); renderShop(); renderMe();
+  hToast('已购入「'+sk.nm+'」并装备','#4ade80');
+}
+function buyPick(pk){
+  if(PROF.picks.indexOf(pk.id)>=0) return;
+  if(PROF.ore<pk.price){
+    hToast('矿仓不足，还差 '+(pk.price-PROF.ore)+' 矿','#ef4444'); return;
+  }
+  PROF.ore-=pk.price;
+  PROF.picks.push(pk.id);
+  PROF.pick=pk.id;
+  saveProf(); syncMoney(); renderShop(); renderMe();
+  hToast('已购入「'+pk.nm+'」并装备 · 单击 '+pk.hits+' 次开采','#4ade80');
+}
+function buyBp(bp){
+  if(PROF.bp[bp.id]) return;
+  if(PROF.ore<bp.price){
+    hToast('矿仓不足，还差 '+(bp.price-PROF.ore)+' 矿','#ef4444'); return;
+  }
+  PROF.ore-=bp.price;
+  PROF.bp[bp.id]=1;
+  saveProf(); syncMoney(); renderShop(); renderMe();
+  hToast('已解锁「'+bp.nm+'」','#fbbf24');
+}
+
+/* ---------- 我的 ---------- */
+function renderMe(){
+  var av=g('pfAv'), ini=g('pfIni');
+  if(av&&ini){
+    if(PROF.avatar){
+      av.style.backgroundImage='url("'+PROF.avatar+'")';
+      ini.style.display='none';
+    }else{
+      av.style.backgroundImage='';
+      ini.style.display='block';
+      ini.textContent=(PROF.nick||'矿').slice(0,1);
+    }
+  }
+  var nm=g('pfName'); if(nm) nm.textContent=PROF.nick;
+  var ni=g('pfNick');
+  if(ni&&document.activeElement!==ni) ni.value=PROF.nick;
+  var set=function(id,v){ var e=g(id); if(e) e.textContent=v; };
+  set('pfMined',fmtNum(PROF.mined));
+  set('pfBest',fmtNum(PROF.best));
+  set('pfRuns',PROF.runs);
+  set('pfWins',PROF.wins);
+  set('pfSkinNm',skinOf(PROF.skin).nm);
+  set('pfPickNm',pickOf(PROF.pick).nm+' ×'+pickHits());
+  syncMoney();
+}
+function applyAvatar(drawable){
+  var S=176;
+  var c=document.createElement('canvas'); c.width=S; c.height=S;
+  var ct=c.getContext('2d');
+  ct.fillStyle='#141b26'; ct.fillRect(0,0,S,S);
+  var iw=drawable.width, ih=drawable.height, side=Math.min(iw,ih);
+  if(!side) return;
+  ct.save();
+  ct.beginPath(); ct.arc(S/2,S/2,S/2,0,6.283); ct.clip();
+  ct.drawImage(drawable,(iw-side)/2,(ih-side)/2,side,side,0,0,S,S);
+  ct.restore();
+  var data='';
+  try{ data=c.toDataURL('image/jpeg',0.84); }catch(e){ data=''; }
+  if(!data){ hToast('头像处理失败，请换一张图片','#ef4444'); return; }
+  PROF.avatar=data;
+  saveProf(); renderMe();
+  hToast('头像已更新','#4ade80');
+}
+function viaImg(f){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var im=new Image();
+    im.onload=function(){ applyAvatar(im); };
+    im.onerror=function(){ hToast('图片读取失败','#ef4444'); };
+    im.src=fr.result;
+  };
+  fr.onerror=function(){ hToast('图片读取失败','#ef4444'); };
+  fr.readAsDataURL(f);
+}
+function pickFile(){
+  var inp=g('avIn'); if(inp) inp.click();
+}
+
+/* ---------- 视图切换 / 任务流转 ---------- */
+var TABS={mine:'viewMine',shop:'viewShop',me:'viewMe'};
+function setTab(t){
+  if(!TABS[t]) return;
+  for(var k in TABS){
+    var v=g(TABS[k]); if(!v) continue;
+    if(k===t) v.removeAttribute('hidden'); else v.setAttribute('hidden','');
+  }
+  var bs=g('tabbar').getElementsByTagName('button');
+  for(var i=0;i<bs.length;i++){
+    bs[i].className='tb'+(bs[i].getAttribute('data-tab')===t?' on':'');
+  }
+  var body=g('homeBody'); if(body) body.scrollTop=0;
+  if(t==='shop') renderShop();
+  if(t==='me') renderMe();
+}
+function startRun(){
+  g('home').className='';
+  EL.mEnd.className='mask';
+  EL.mPau.className='mask';
+  init();
+  state=S_PLAY;
+}
+function showHome(){
+  g('home').className='on';
+  syncMoney(); renderShop(); renderMe();
+}
+function goHomeFromEnd(){
+  EL.mEnd.className='mask';
+  state=S_MENU;
+  showHome();
+  setTab('mine');
+}
+function abandonRun(){
+  if(state!==S_PLAY&&state!==S_PAUSE) return;
+  // 中途放弃＝撤离失败：矿石全部遗失，矿仓不增加
+  PROF.runs++; PROF.mined+=p.ore;
+  if(p.ore>PROF.best) PROF.best=p.ore;
+  saveProf();
+  EL.mPau.className='mask';
+  state=S_MENU;
+  showHome();
+  setTab('mine');
+  hToast('已返回基地 · 矿石全部遗失','#fbbf24');
+}
+
+/* ---------- 事件绑定 ---------- */
+(function(){
+  var tbs=g('tabbar').getElementsByTagName('button');
+  for(var i=0;i<tbs.length;i++){
+    (function(b){
+      b.addEventListener('click',function(){ setTab(b.getAttribute('data-tab')); });
+    })(tbs[i]);
+  }
+  var sub=document.querySelectorAll('.subtabs .st');
+  for(var j=0;j<sub.length;j++){
+    (function(b){
+      b.addEventListener('click',function(){
+        shopCat=b.getAttribute('data-cat');
+        for(var m=0;m<sub.length;m++) sub[m].className='st'+(sub[m]===b?' on':'');
+        renderShop();
+      });
+    })(sub[j]);
+  }
+  g('homeBal').addEventListener('click',function(){ setTab('shop'); });
+
+  var avIn=g('avIn');
+  if(avIn){
+    avIn.addEventListener('change',function(e){
+      var f=(e.target.files&&e.target.files[0])||null;
+      try{ e.target.value=''; }catch(err){}
+      if(!f) return;
+      if(!/^image\//i.test(f.type)){ hToast('请选择图片文件','#ef4444'); return; }
+      if(f.size>8*1024*1024){ hToast('图片过大，请选择小于 8MB 的图片','#ef4444'); return; }
+      if(window.createImageBitmap){
+        try{
+          createImageBitmap(f,{imageOrientation:'from-image'})
+            .then(function(bm){ applyAvatar(bm); })
+            .catch(function(){ viaImg(f); });
+          return;
+        }catch(err){}
+      }
+      viaImg(f);
+    });
+  }
+  var avBtn=g('pfAvBtn'); if(avBtn) avBtn.addEventListener('click',pickFile);
+  var saveBtn=g('pfSave');
+  if(saveBtn){
+    saveBtn.addEventListener('click',function(){
+      var v=(g('pfNick').value||'').replace(/\s+/g,' ').trim();
+      if(!v){ hToast('昵称不能为空','#ef4444'); return; }
+      PROF.nick=v.slice(0,12);
+      saveProf(); renderMe();
+      hToast('昵称已保存','#4ade80');
+    });
+  }
+  var nickIn=g('pfNick');
+  if(nickIn){
+    nickIn.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.keyCode===13){ e.preventDefault(); saveBtn.click(); }
+    });
+  }
+  var wipe=g('btnWipe');
+  if(wipe){
+    wipe.addEventListener('click',function(){
+      var ok=window.confirm('确定清空本机存档？矿仓矿石、涂装、设计稿、昵称与头像都会丢失。');
+      if(!ok) return;
+      try{ localStorage.removeItem(LS_KEY); }catch(e){}
+      PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
+            picks:['p1'],pick:'p1',bp:{},runs:0,wins:0,mined:0,best:0};
+      renderMe(); renderShop(); syncMoney();
+      hToast('存档已清空','#fbbf24');
+    });
+  }
+})();
+
+loadProf();
+renderMe();
+renderShop();
+syncMoney();
+
 init();
 _raf=requestAnimationFrame(loop);
 })();
