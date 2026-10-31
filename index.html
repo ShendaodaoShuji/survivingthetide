@@ -152,7 +152,8 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 .item2 .c2b.eq{background:rgba(155,125,255,.14);border-color:rgba(155,125,255,.45);color:#c4b5fd}
 .pf{display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;margin-bottom:11px;
  background:linear-gradient(135deg,rgba(255,140,74,.13),rgba(155,125,255,.1));
- border:1px solid rgba(255,255,255,.11)}
+ border:1px solid rgba(255,255,255,.11);cursor:pointer}
+.pf:active{border-color:rgba(255,140,74,.45)}
 .pfAvWrap{position:relative;flex:0 0 auto;width:74px;height:74px}
 .pfAv{display:flex;align-items:center;justify-content:center;width:74px;height:74px;border-radius:50%;
  overflow:hidden;cursor:pointer;border:2px solid rgba(255,140,74,.6);background:rgba(255,255,255,.06) center/cover no-repeat}
@@ -252,7 +253,15 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 .fr-foot .sbtn{width:100%;padding:8px 0;font-size:11px}
 .req-line{font-size:11.5px;line-height:1.7;color:#b6bfcd;text-align:left}
 .req-line b{color:#f0e6d8}
-#tabbar{position:relative;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);
+/* 编辑档案弹窗 */
+.pfEdit{display:flex;flex-direction:column;align-items:center;gap:10px;margin:4px 0 4px}
+.pfEdit .pfAv{width:84px;height:84px}
+.pfEdit .pfAv .ini{font-size:30px}
+.pfEdit .sbtn{padding:8px 18px;font-size:11.5px}
+.btn.danger{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.42);color:#fca5a5;
+ font-weight:400;margin-top:8px}
+.cloud-state{display:block;text-align:center;margin:8px 0 2px;font-size:9.5px;color:#6b7789}
+#tabbar{position:relative;z-index:3;display:grid;grid-template-columns:repeat(4,1fr);
  background:rgba(9,13,19,.96);border-top:1px solid rgba(255,255,255,.1);
  padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(12px)}
 .tb{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -351,7 +360,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 
     <section class="hv" id="viewShop" hidden>
       <div class="sec-h">商城 <span>使用矿仓中的源能矿兑换</span></div>
-      <div class="subtabs">
+      <div class="subtabs" id="shopTabs">
         <button class="st on" data-cat="skin">涂装</button>
         <button class="st" data-cat="pick">镐子</button>
         <button class="st" data-cat="bp">武器</button>
@@ -362,17 +371,17 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 
     <section class="hv" id="viewMe" hidden>
       <div class="sec-h">我的 <span>矿工档案</span></div>
-      <div class="pf">
+      <div class="pf" id="pfCard">
         <div class="pfAvWrap">
-          <label class="pfAv" id="pfAv" for="avIn"><span class="ini" id="pfIni">矿</span></label>
-          <span class="pfCam">📷</span>
+          <span class="pfAv" id="pfAv"><span class="ini" id="pfIni">矿</span></span>
+          <span class="pfCam">✎</span>
         </div>
-        <input type="file" id="avIn" accept="image/*" hidden>
         <div class="pfMeta">
           <b id="pfName">无名矿工</b>
-          <span>迦太基-7 · 萤火级</span>
+          <span id="pfTip">点击头像或昵称修改档案</span>
         </div>
       </div>
+      <input type="file" id="avIn" accept="image/*" hidden>
 
       <div class="pf-id">
         <div><span>工号 · MINER ID</span><b id="pfMinerId">MINER-000000-000000</b></div>
@@ -391,59 +400,55 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
         </div>
       </div>
 
-      <div class="cloud">
-        <button class="sbtn" id="pfSyncCloud">同步库存到云端</button>
-        <span class="cloud-state" id="pfSyncState">未同步</span>
-      </div>
-
       <div class="pstats">
+        <div><i>本月开采</i><b id="pfMonthMined">0</b></div>
         <div><i>出动次数</i><b id="pfRuns">0</b></div>
         <div><i>成功撤离</i><b id="pfWins">0</b></div>
-        <div><i>当前涂装</i><b id="pfSkinNm" style="font-size:10px;line-height:1.4">熔橙</b></div>
-      </div>
-
-      <div class="field">
-        <label>昵称 · NICKNAME</label>
-        <div class="row">
-          <input id="pfNick" maxlength="12" placeholder="输入你的矿工代号">
-          <button class="sbtn" id="pfSave">保存</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>头像 · AVATAR</label>
-        <div class="row">
-          <button class="sbtn" id="pfAvBtn" style="width:100%;padding:10px 0">上传 / 更换头像</button>
-        </div>
-      </div>
-      <div class="lb">
-        <div class="lb-h"><b>云端排行榜</b><span id="lbMeta">按累计总开采量</span></div>
-        <div class="lb-list" id="lbList"><div class="lb-empty">点击「刷新」加载</div></div>
-        <div class="lb-foot">
-          <button class="sbtn" id="lbRefresh">刷新</button>
-          <button class="sbtn" id="lbSync">同步我的成绩</button>
-        </div>
-        <div class="lb-state" id="lbState"></div>
-      </div>
-
-      <div class="fr">
-        <div class="fr-h"><b>好友</b><span id="frMeta">0 位好友</span></div>
-        <div class="fr-add">
-          <input id="frInput" maxlength="20" autocomplete="off" placeholder="对方工号 MINER-202610-123456">
-          <button class="sbtn" id="frAdd">添加</button>
-        </div>
-        <div class="fr-list" id="frList"><div class="fr-empty">还没有好友，输入工号加一个</div></div>
-        <div class="fr-foot"><button class="sbtn" id="frRefresh">刷新好友</button></div>
-        <div class="fr-state" id="frState"></div>
       </div>
 
       <p class="hint">工号、昵称、头像与库存会同步到云端；好友能看到你最近一次同步的库存。</p>
+      <button class="btn ghost" id="pfSyncCloud">同步库存到云端</button>
+      <div class="cloud-state" id="pfSyncState">未同步</div>
       <button class="btn ghost" id="btnWipe">清空本机存档</button>
+    </section>
+
+    <section class="hv" id="viewSocial" hidden>
+      <div class="sec-h">社交 <span>排行榜 · 好友</span></div>
+      <div class="subtabs" id="socTabs">
+        <button class="st on" data-soc="rank">排行榜</button>
+        <button class="st" data-soc="friends">好友</button>
+      </div>
+
+      <div id="socRank">
+        <div class="lb">
+          <div class="lb-h"><b>本月排行榜</b><span id="lbMeta">按本月挖矿量</span></div>
+          <div class="lb-list" id="lbList"><div class="lb-empty">加载中…</div></div>
+          <div class="lb-foot">
+            <button class="sbtn" id="lbRefresh">刷新排行榜</button>
+            <button class="sbtn" id="lbSync">同步我的成绩</button>
+          </div>
+          <div class="lb-state" id="lbState"></div>
+        </div>
+      </div>
+
+      <div id="socFriends" hidden>
+        <div class="fr">
+          <div class="fr-h"><b>好友</b><span id="frMeta">0 位好友</span></div>
+          <div class="fr-add">
+            <input id="frSearch" maxlength="20" autocomplete="off" placeholder="搜索昵称或工号；输入完整工号可添加">
+          </div>
+          <div class="fr-list" id="frList"><div class="fr-empty">还没有好友</div></div>
+          <div class="fr-foot"><button class="sbtn" id="frRefresh">刷新好友</button></div>
+          <div class="fr-state" id="frState"></div>
+        </div>
+      </div>
     </section>
 
   </main>
   <nav id="tabbar">
     <button class="tb on" data-tab="mine"><u>⛏</u><b>采集</b></button>
     <button class="tb" data-tab="shop"><u>🛒</u><b>商城</b></button>
+    <button class="tb" data-tab="social"><u>👥</u><b>社交</b></button>
     <button class="tb" data-tab="me"><u>👤</u><b>我的</b></button>
   </nav>
 </div>
@@ -470,6 +475,22 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
   <h1 id="frTitle">好友档案</h1>
   <div class="brief" id="frDetail"></div>
   <button class="btn" id="frClose">关闭</button>
+  <button class="btn danger" id="frDelete">删除好友</button>
+</div></div>
+<div class="mask" id="mProfile"><div class="card">
+  <h1>编辑档案</h1>
+  <div class="pfEdit">
+    <span class="pfAv" id="pfAvEdit"><span class="ini" id="pfIniEdit">矿</span></span>
+    <button class="sbtn" id="pfAvBtn">更换头像</button>
+  </div>
+  <div class="field" style="margin-top:12px">
+    <label>昵称 · NICKNAME</label>
+    <div class="row">
+      <input id="pfNick" maxlength="12" placeholder="输入你的矿工代号">
+      <button class="sbtn" id="pfSave">保存</button>
+    </div>
+  </div>
+  <button class="btn ghost" id="pfEditClose">关闭</button>
 </div></div>
 <div class="mask" id="mReq"><div class="card">
   <h1>好友申请</h1>
@@ -849,6 +870,8 @@ function end(win){
   PROF.runs++;
   if(win) PROF.wins++;
   PROF.mined += p.ore;
+  ensureMonth();
+  PROF.monthMined += p.ore;
   if(p.ore>PROF.best) PROF.best=p.ore;
   saveProf();
   syncLeaderboard(false);
@@ -1465,7 +1488,8 @@ var BPS=[
 var PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
           picks:['p1'],pick:'p1',bp:{},
           runs:0,wins:0,mined:0,best:0,
-          playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0,
+          month:'',monthMined:0,
+          playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0,syncedMonth:'',
           minerId:'',avatarUrl:'',uploadedAvatarSig:'',cloudSyncedAt:0};
 function skinOf(id){
   for(var i=0;i<SKINS.length;i++) if(SKINS[i].id===id) return SKINS[i];
@@ -1480,6 +1504,11 @@ function curSkin(){ return skinOf(PROF.skin); }
 function fmtNum(n){
   n=Math.max(0,Math.floor(n||0));
   return n>=10000 ? (n/1000).toFixed(1)+'k' : String(n);
+}
+function fmtMonth(key){
+  var s=String(key||'');
+  if(!/^\d{6}$/.test(s)) return '本月';
+  return s.slice(0,4)+'年'+parseInt(s.slice(4,6),10)+'月';
 }
 var _htT=null;
 function hToast(msg,col){
@@ -1533,6 +1562,9 @@ function loadProf(){
   if(typeof o.avatarUrl==='string'&&o.avatarUrl.indexOf('http')===0) PROF.avatarUrl=o.avatarUrl;
   PROF.uploadedAvatarSig=typeof o.uploadedAvatarSig==='string'?o.uploadedAvatarSig:'';
   PROF.cloudSyncedAt=Math.max(0,o.cloudSyncedAt|0);
+  PROF.month=typeof o.month==='string'&&/^\d{6}$/.test(o.month)?o.month:'';
+  PROF.monthMined=Math.max(0,o.monthMined|0);
+  PROF.syncedMonth=typeof o.syncedMonth==='string'?o.syncedMonth:'';
 }
 function syncMoney(){
   var a=g('balNum'); if(a) a.textContent=fmtNum(PROF.ore);
@@ -1669,9 +1701,11 @@ function buyBp(bp){
 }
 
 /* ---------- 我的 ---------- */
-function renderMe(){
-  var av=g('pfAv'), ini=g('pfIni');
-  if(av&&ini){
+function renderProfileAvatars(){
+  var pairs=[['pfAv','pfIni'],['pfAvEdit','pfIniEdit']];
+  for(var i=0;i<pairs.length;i++){
+    var av=g(pairs[i][0]), ini=g(pairs[i][1]);
+    if(!av||!ini) continue;
     if(PROF.avatar){
       av.style.backgroundImage='url("'+PROF.avatar+'")';
       ini.style.display='none';
@@ -1681,15 +1715,63 @@ function renderMe(){
       ini.textContent=(PROF.nick||'矿').slice(0,1);
     }
   }
+}
+
+function openProfileEdit(){
+  var ni=g('pfNick');
+  if(ni) ni.value=PROF.nick;
+  renderProfileAvatars();
+  var m=g('mProfile'); if(m) m.className='mask on';
+}
+
+// 清空本机存档 + 删除云端档案/排行榜记录/好友关系
+function wipeAccount(){
+  var oldMiner=PROF.minerId, oldPlayer=PROF.playerId;
+  var resetLocal=function(cloudOk){
+    try{ localStorage.removeItem(LS_KEY); }catch(e){}
+    PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
+          picks:['p1'],pick:'p1',bp:{},runs:0,wins:0,mined:0,best:0,
+          month:'',monthMined:0,
+          playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0,syncedMonth:'',
+          minerId:'',avatarUrl:'',uploadedAvatarSig:'',cloudSyncedAt:0};
+    ensurePlayerId();
+    ensureMinerId();
+    ensureMonth();
+    renderMe(); renderShop(); syncMoney();
+    setLbState('','');
+    setCloudState(cloudOk?'ok':'err',cloudOk?'云端档案已删除':'云端删除失败');
+    var list=g('lbList'); if(list) list.innerHTML='<div class="lb-empty">加载中…</div>';
+    _friendsData=null;
+    renderFriends();
+    hToast(cloudOk?'存档已清空，云端账号已删除':'本地已清空，云端删除失败','#fbbf24');
+    if(cloudOk) syncPlayerCloud(); // 用新工号重新注册一个空档案
+  };
+  if(typeof fetch!=='function'||!oldMiner){ resetLocal(false); return; }
+  setCloudState('','正在删除云端档案…');
+  fetch('/api/delete-account',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({minerId:oldMiner,playerId:oldPlayer||null})
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(b){ return {status:r.status,body:b}; });
+  }).then(function(res){
+    resetLocal(res.status===200&&res.body&&res.body.ok===true);
+  }).catch(function(){
+    resetLocal(false);
+  });
+}
+
+function renderMe(){
+  renderProfileAvatars();
   var nm=g('pfName'); if(nm) nm.textContent=PROF.nick;
   var ni=g('pfNick');
   if(ni&&document.activeElement!==ni) ni.value=PROF.nick;
   var set=function(id,v){ var e=g(id); if(e) e.textContent=v; };
   set('pfMined',fmtNum(PROF.mined));
   set('pfBest',fmtNum(PROF.best));
+  set('pfMonthMined',fmtNum(PROF.monthMined));
   set('pfRuns',PROF.runs);
   set('pfWins',PROF.wins);
-  set('pfSkinNm',skinOf(PROF.skin).nm);
   set('pfPickNm',pickOf(PROF.pick).nm+' ×'+pickHits());
   set('pfMinerId',ensureMinerId());
   if(PROF.cloudSyncedAt){
@@ -1771,10 +1853,12 @@ function syncLeaderboard(force){
   if(typeof fetch!=='function') return Promise.resolve(null);
   var nick=(PROF.nick||'').trim();
   if(!nick) return Promise.resolve(null);
-  var score=Math.max(0,Math.floor(PROF.mined||0));
+  ensureMonth();
+  // 月度榜：score 是「本月挖矿量」，不是生涯总量
+  var score=Math.max(0,Math.floor(PROF.monthMined||0));
   if(!force&&score<=0) return Promise.resolve(null);
   var sig=lbAvatarSig();
-  if(!force&&PROF.syncedScore===score&&PROF.syncedNick===nick&&PROF.syncedAvatarSig===sig){
+  if(!force&&PROF.syncedScore===score&&PROF.syncedNick===nick&&PROF.syncedAvatarSig===sig&&PROF.syncedMonth===PROF.month){
     return Promise.resolve(null);
   }
   var payload={
@@ -1805,11 +1889,12 @@ function syncLeaderboard(force){
     PROF.syncedScore=score;
     PROF.syncedNick=nick;
     PROF.syncedAvatarSig=sig;
+    PROF.syncedMonth=PROF.month;
     PROF.syncedAt=Date.now();
     if(typeof r.body.rank==='number'&&r.body.rank>0) PROF.rank=r.body.rank;
     if(r.body.entry&&r.body.entry.avatar_url) PROF.avatarUrl=r.body.entry.avatar_url;
     saveProf();
-    setLbState('ok','已同步 · 累计 '+fmtNum(score)+' 矿'+(PROF.rank?' · 第 '+PROF.rank+' 名':''));
+    setLbState('ok','已同步 · 本月 '+fmtNum(score)+' 矿'+(PROF.rank?' · 第 '+PROF.rank+' 名':''));
     if(_tab==='me') loadLeaderboard();
     return r.body;
   }).catch(function(){
@@ -1848,7 +1933,7 @@ function loadLeaderboard(){
   if(!list||typeof fetch!=='function'||_lbLoading) return;
   _lbLoading=true;
   if(!list.children.length) list.innerHTML='<div class="lb-empty">加载中…</div>';
-  fetch(LB_TOP+'?limit=10&me='+encodeURIComponent(PROF.playerId||''),{headers:{accept:'application/json'}})
+  fetch(LB_TOP+'?limit=100&me='+encodeURIComponent(PROF.playerId||''),{headers:{accept:'application/json'}})
     .then(function(res){
       if(!res.ok) throw new Error('http_'+res.status);
       return res.json();
@@ -1857,7 +1942,7 @@ function loadLeaderboard(){
       if(!data||data.ok!==true) throw new Error('bad_payload');
       renderLb(data);
       var meta=g('lbMeta');
-      if(meta) meta.textContent='共 '+(data.total||0)+' 位矿工 · 按累计总开采量';
+      if(meta) meta.textContent=(data.month?fmtMonth(data.month):'本月')+' · 共 '+(data.total||0)+' 位矿工';
       var st=g('lbState');
       if(st&&/^(刷新中|读取排行榜失败)/.test(st.textContent)) setLbState('','');
     })
@@ -1874,7 +1959,7 @@ var CLOUD_API='/api/sync-player';
 var FR_API_ADD='/api/add-friend';
 var FR_API_LIST='/api/get-friends';
 var _cloudBusy=false,_minerRetry=0,_friendsBusy=false,_friendsData=null;
-var _reqQueue=[],_reqSeen={},_reqCurrent=null;
+var _reqQueue=[],_reqSeen={},_reqCurrent=null,_currentFriend=null;
 
 function ensureMinerId(){
   if(PROF.minerId&&MINER_RE.test(PROF.minerId)) return PROF.minerId;
@@ -1885,6 +1970,24 @@ function ensureMinerId(){
   PROF.minerId='MINER-'+ym+'-'+rnd;
   saveProf();
   return PROF.minerId;
+}
+
+// 本月键（本地时区 YYYYMM），月度榜的分母
+function currentMonthKey(){
+  var d=new Date();
+  return ''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
+}
+
+// 跨月自动清零「本月开采」
+function ensureMonth(){
+  var m=currentMonthKey();
+  if(PROF.month!==m){
+    PROF.month=m;
+    PROF.monthMined=0;
+    PROF.syncedMonth='';
+    saveProf();
+  }
+  return m;
 }
 
 function timeAgo(iso){
@@ -1984,7 +2087,8 @@ function loadFriends(){
         throw new Error((res.body&&res.body.error)||('HTTP '+res.status));
       }
       _friendsData=res.body;
-      renderFriends(res.body);
+      _friendsData=res.body;
+      renderFriends();
       var meta=g('frMeta');
       if(meta) meta.textContent=((res.body.friends||[]).length)+' 位好友';
       setFrState('','');
@@ -2000,15 +2104,48 @@ function loadFriends(){
     .then(function(x){ _friendsBusy=false; return x; });
 }
 
-function renderFriends(data){
+function friendMatches(f,q){
+  if(!q) return true;
+  var s=q.toLowerCase();
+  return String(f.nickname||'').toLowerCase().indexOf(s)>=0 ||
+         String(f.minerId||'').toLowerCase().indexOf(s)>=0;
+}
+
+function renderFriends(){
   var list=g('frList'); if(!list) return;
   list.innerHTML='';
-  var friends=(data&&data.friends)||[];
-  if(!friends.length){
-    list.appendChild(el2('div','fr-empty','还没有好友，输入工号加一个'));
-    return;
+  var friends=(_friendsData&&_friendsData.friends)||[];
+  var input=g('frSearch');
+  var raw=input?(input.value||'').trim():'';
+  var q=raw.toUpperCase();
+
+  // 输入完整工号、且还不是好友时，给一个添加入口
+  var canAdd=MINER_RE.test(q)&&q!==PROF.minerId&&!friends.some(function(f){ return f.minerId===q; });
+  if(canAdd){
+    var addRow=el2('div','fr-row');
+    addRow.style.cursor='default';
+    var addAv=el2('span','fr-av','＋');
+    var addNm=el2('div','fr-nm');
+    addNm.appendChild(el2('b',null,'添加 '+q));
+    addNm.appendChild(el2('span',null,'发送好友申请'));
+    var addBtn=el2('button','sbtn','添加');
+    addBtn.style.padding='6px 12px';
+    addBtn.style.fontSize='11px';
+    addBtn.addEventListener('click',function(ev){
+      if(ev&&ev.stopPropagation) ev.stopPropagation();
+      addFriend(q);
+    });
+    addRow.appendChild(addAv);
+    addRow.appendChild(addNm);
+    addRow.appendChild(addBtn);
+    list.appendChild(addRow);
   }
-  friends.forEach(function(f){
+
+  var shown=friends.filter(function(f){ return friendMatches(f,raw); });
+  if(!shown.length&&!canAdd){
+    list.appendChild(el2('div','fr-empty',friends.length?'没有匹配的好友':'还没有好友'));
+  }
+  shown.forEach(function(f){
     var row=el2('div','fr-row');
     var av=el2('span','fr-av');
     if(f.avatarUrl) av.style.backgroundImage='url("'+f.avatarUrl+'")';
@@ -2036,6 +2173,7 @@ function bpName(id){
 
 function showFriend(f){
   if(!f) return;
+  _currentFriend=f;
   var title=g('frTitle'); if(title) title.textContent=f.nickname||'好友';
   var box=g('frDetail'); if(!box) return;
   box.innerHTML='';
@@ -2139,9 +2277,9 @@ function respondRequest(accept){
   });
 }
 
-function addFriend(){
-  var input=g('frInput');
-  var raw=input?(input.value||'').trim().toUpperCase():'';
+function addFriend(minerId){
+  var input=g('frSearch');
+  var raw=(minerId||(input?(input.value||''):'')).trim().toUpperCase();
   if(!MINER_RE.test(raw)){ hToast('工号格式：MINER-202610-123456','#ef4444'); return; }
   if(raw===ensureMinerId()){ hToast('不能添加自己','#ef4444'); return; }
   setFrState('','处理中…');
@@ -2168,9 +2306,34 @@ function addFriend(){
   });
 }
 
+function deleteFriend(){
+  var f=_currentFriend;
+  if(!f) return;
+  var name=f.nickname||f.minerId;
+  if(!window.confirm('确定删除好友「'+name+'」？')) return;
+  setFrState('','删除中…');
+  fetch(FR_API_ADD,{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({minerId:ensureMinerId(),friendMinerId:f.minerId,action:'remove'})
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(b){ return {status:r.status,body:b}; });
+  }).then(function(res){
+    if(res.status>=400||!res.body||res.body.ok!==true){
+      throw new Error((res.body&&res.body.error)||('HTTP '+res.status));
+    }
+    var m=g('mFriend'); if(m) m.className='mask';
+    _currentFriend=null;
+    hToast('已删除好友','#fbbf24');
+    loadFriends();
+  }).catch(function(e){
+    setFrState('err','删除失败：'+((e&&e.message)||'网络不可用'));
+  });
+}
+
 /* ---------- 视图切换 / 任务流转 ---------- */
-var TABS={mine:'viewMine',shop:'viewShop',me:'viewMe'};
-var _tab='mine';
+var TABS={mine:'viewMine',shop:'viewShop',social:'viewSocial',me:'viewMe'};
+var _tab='mine',_socTab='rank';
 function setTab(t){
   if(!TABS[t]) return;
   _tab=t;
@@ -2184,7 +2347,24 @@ function setTab(t){
   }
   var body=g('homeBody'); if(body) body.scrollTop=0;
   if(t==='shop') renderShop();
-  if(t==='me'){ renderMe(); loadLeaderboard(); loadFriends(); }
+  if(t==='social') setSocTab(_socTab);
+  if(t==='me') renderMe();
+}
+
+function setSocTab(name){
+  _socTab=name==='friends'?'friends':'rank';
+  var rank=g('socRank'), friends=g('socFriends');
+  if(rank){ if(_socTab==='rank') rank.removeAttribute('hidden'); else rank.setAttribute('hidden',''); }
+  if(friends){ if(_socTab==='friends') friends.removeAttribute('hidden'); else friends.setAttribute('hidden',''); }
+  var tabs=g('socTabs');
+  if(tabs){
+    var bs=tabs.getElementsByTagName('button');
+    for(var i=0;i<bs.length;i++){
+      bs[i].className='st'+(bs[i].getAttribute('data-soc')===_socTab?' on':'');
+    }
+  }
+  if(_socTab==='rank') loadLeaderboard();
+  else loadFriends();
 }
 function startRun(){
   g('home').className='';
@@ -2207,6 +2387,8 @@ function abandonRun(){
   if(state!==S_PLAY&&state!==S_PAUSE) return;
   // 中途放弃＝撤离失败：矿石全部遗失，矿仓不增加
   PROF.runs++; PROF.mined+=p.ore;
+  ensureMonth();
+  PROF.monthMined+=p.ore;
   if(p.ore>PROF.best) PROF.best=p.ore;
   saveProf();
   syncLeaderboard(false);
@@ -2226,7 +2408,7 @@ function abandonRun(){
       b.addEventListener('click',function(){ setTab(b.getAttribute('data-tab')); });
     })(tbs[i]);
   }
-  var sub=document.querySelectorAll('.subtabs .st');
+  var sub=document.querySelectorAll('#shopTabs .st');
   for(var j=0;j<sub.length;j++){
     (function(b){
       b.addEventListener('click',function(){
@@ -2266,6 +2448,7 @@ function abandonRun(){
       PROF.nick=v.slice(0,12);
       saveProf(); renderMe();
       hToast('昵称已保存','#4ade80');
+      var m=g('mProfile'); if(m) m.className='mask';
       syncPlayerCloud();
       syncLeaderboard(false);
     });
@@ -2273,23 +2456,21 @@ function abandonRun(){
   var nickIn=g('pfNick');
   if(nickIn){
     nickIn.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.keyCode===13){ e.preventDefault(); saveBtn.click(); }
+      if(e.key==='Enter'||e.keyCode===13){ e.preventDefault(); if(saveBtn) saveBtn.click(); }
     });
   }
+  var pfCard=g('pfCard');
+  if(pfCard) pfCard.addEventListener('click',openProfileEdit);
+  var pfEditClose=g('pfEditClose');
+  if(pfEditClose) pfEditClose.addEventListener('click',function(){
+    var m=g('mProfile'); if(m) m.className='mask';
+  });
   var wipe=g('btnWipe');
   if(wipe){
     wipe.addEventListener('click',function(){
-      var ok=window.confirm('确定清空本机存档？矿仓矿石、涂装、镐子、昵称与头像都会丢失；云端排行榜上的旧记录不会删除，但会以新的玩家身份重新开始。');
+      var ok=window.confirm('确定清空本机存档？矿石、涂装、镐子、好友关系和云端档案都会被删除，排行榜上也不再显示这个工号。');
       if(!ok) return;
-      try{ localStorage.removeItem(LS_KEY); }catch(e){}
-      PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
-            picks:['p1'],pick:'p1',bp:{},runs:0,wins:0,mined:0,best:0,
-            playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0,
-            minerId:'',avatarUrl:'',uploadedAvatarSig:'',cloudSyncedAt:0};
-      renderMe(); renderShop(); syncMoney();
-      setLbState('','存档已清空');
-      setCloudState('','未同步');
-      hToast('存档已清空','#fbbf24');
+      wipeAccount();
     });
   }
 
@@ -2311,16 +2492,30 @@ function abandonRun(){
   });
   var syncCloudBtn=g('pfSyncCloud');
   if(syncCloudBtn) syncCloudBtn.addEventListener('click',function(){ syncPlayerCloud(); });
-  var frAddBtn=g('frAdd');
-  if(frAddBtn) frAddBtn.addEventListener('click',addFriend);
-  var frInput=g('frInput');
-  if(frInput) frInput.addEventListener('keydown',function(e){
-    if(e.key==='Enter'||e.keyCode===13){ e.preventDefault(); addFriend(); }
-  });
+
+  var socTabs=g('socTabs');
+  if(socTabs){
+    var sbs=socTabs.getElementsByTagName('button');
+    for(var si=0;si<sbs.length;si++){
+      (function(b){
+        b.addEventListener('click',function(){ setSocTab(b.getAttribute('data-soc')); });
+      })(sbs[si]);
+    }
+  }
+
+  var frSearch=g('frSearch');
+  if(frSearch){
+    frSearch.addEventListener('input',renderFriends);
+    frSearch.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.keyCode===13){ e.preventDefault(); if(MINER_RE.test((frSearch.value||'').trim().toUpperCase())) addFriend(); }
+    });
+  }
   var frRefresh=g('frRefresh');
   if(frRefresh) frRefresh.addEventListener('click',function(){ loadFriends(); });
   var frClose=g('frClose');
   if(frClose) frClose.addEventListener('click',function(){ g('mFriend').className='mask'; });
+  var frDelete=g('frDelete');
+  if(frDelete) frDelete.addEventListener('click',deleteFriend);
   var reqAccept=g('reqAccept');
   if(reqAccept) reqAccept.addEventListener('click',function(){ respondRequest(true); });
   var reqDecline=g('reqDecline');
@@ -2330,6 +2525,7 @@ function abandonRun(){
 loadProf();
 ensurePlayerId();
 ensureMinerId();
+ensureMonth();
 renderMe();
 renderShop();
 syncMoney();

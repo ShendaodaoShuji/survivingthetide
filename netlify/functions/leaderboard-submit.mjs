@@ -18,7 +18,7 @@
  *   {
  *     "playerId": "0f6b…",           // 可选但建议：客户端生成并持久化的 UUID
  *     "nickname": "夜行者",          // 必填，清洗后 1–12 个字符
- *     "score": 1234,                // 必填，非负整数；本作里是「累计总开采量」
+ *     "score": 1234,                // 必填，非负整数；本月挖矿量（服务端记录月份）
  *     "avatar": "data:image/jpeg;base64,...", // 可选，<=200KB，jpeg/png/webp
  *     "stats": { "runs": 12, "wins": 7, "best": 31 } // 可选，白名单数值
  *   }
@@ -75,6 +75,12 @@ function sbHeaders(cfg, extra) {
     { apikey: cfg.key, authorization: 'Bearer ' + cfg.key },
     extra || {}
   );
+}
+
+/** 当月键 YYYYMM，固定按 Asia/Shanghai（UTC+8）计算，和前端展示对齐 */
+function currentMonth() {
+  const d = new Date(Date.now() + 8 * 3600 * 1000);
+  return d.toISOString().slice(0, 7).replace('-', '');
 }
 
 /** 清洗昵称：NFKC、去掉控制字符/零宽字符、压缩空白、按码点截断 */
@@ -229,12 +235,12 @@ async function uploadAvatar(cfg, avatar) {
 }
 
 async function upsertEntry(cfg, row, playerId) {
-  // 有 player_id 时按 player_id upsert：一名玩家在榜上只保留一行，
+  // 有 player_id 时按 (player_id, month) upsert：一名玩家每月一行，
   // score 由数据库触发器保证只增不减。
   const url =
     cfg.url +
     '/rest/v1/leaderboard' +
-    (playerId ? '?on_conflict=player_id' : '');
+    (playerId ? '?on_conflict=' + encodeURIComponent('player_id,month') : '');
   const prefer = playerId
     ? 'resolution=merge-duplicates,return=representation'
     : 'return=representation';
@@ -255,10 +261,11 @@ async function upsertEntry(cfg, row, playerId) {
   return Array.isArray(rows) && rows.length ? rows[0] : null;
 }
 
-async function rankOf(cfg, score) {
-  const res = await fetch(cfg.url + '/rest/v1/leaderboard?select=id&score=gt.' + score, {
-    headers: sbHeaders(cfg, { prefer: 'count=exact', range: '0-0' })
-  });
+async function rankOf(cfg, score, month) {
+  const res = await fetch(
+    cfg.url + '/rest/v1/leaderboard?select=id&month=eq.' + encodeURIComponent(month) + '&score=gt.' + score,
+    { headers: sbHeaders(cfg, { prefer: 'count=exact', range: '0-0' }) }
+  );
   const higher = await totalFrom(res);
   return higher === null ? null : higher + 1;
 }
@@ -397,9 +404,11 @@ export default async function handler(request, context) {
       }
     }
 
+    const month = currentMonth();
     const row = {
       nickname,
       score,
+      month,
       stats,
       ip_hash: ipHash
     };
@@ -412,7 +421,7 @@ export default async function handler(request, context) {
 
     let rank = null;
     try {
-      rank = await rankOf(cfg, finalScore);
+      rank = await rankOf(cfg, finalScore, month);
     } catch (e) {
       console.error('leaderboard-submit: rank query failed', e.message);
     }
@@ -425,6 +434,7 @@ export default async function handler(request, context) {
           id: entry ? entry.id : null,
           nickname,
           score: finalScore,
+          month,
           avatar_url: entry && entry.avatar_url !== undefined ? entry.avatar_url : avatarUrl,
           stats,
           created_at: entry ? entry.created_at : new Date().toISOString()

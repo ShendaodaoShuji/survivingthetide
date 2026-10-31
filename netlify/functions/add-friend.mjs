@@ -123,7 +123,7 @@ async function acceptRequest(cfg, id) {
 
 async function deleteRequest(cfg, id) {
   const res = await fetch(
-    cfg.url + '/rest/v1/friendships?id=eq.' + encodeURIComponent(id) + '&status=eq.pending',
+    cfg.url + '/rest/v1/friendships?id=eq.' + encodeURIComponent(id),
     { method: 'DELETE', headers: sbHeaders(cfg, { prefer: 'return=representation' }) }
   );
   return res.ok;
@@ -170,7 +170,7 @@ export default async function handler(request) {
   if (!minerId) return json(400, { ok: false, error: 'invalid_miner_id' }, cors);
   if (!friendMinerId) return json(400, { ok: false, error: 'invalid_friend_miner_id' }, cors);
   if (minerId === friendMinerId) return json(400, { ok: false, error: 'cannot_add_self' }, cors);
-  if (['request', 'accept', 'decline'].indexOf(action) < 0) {
+  if (['request', 'accept', 'decline', 'remove'].indexOf(action) < 0) {
     return json(400, { ok: false, error: 'invalid_action' }, cors);
   }
 
@@ -190,6 +190,16 @@ export default async function handler(request) {
     if (!target) return json(404, { ok: false, error: 'target_not_found' }, cors);
 
     const pair = await getPair(cfg, minerId, friendMinerId);
+
+    /* ---------- 删除好友 ---------- */
+    if (action === 'remove') {
+      if (!pair || pair.status !== 'accepted') {
+        return json(404, { ok: false, error: 'not_friends' }, cors);
+      }
+      const ok = await deleteRequest(cfg, pair.id);
+      if (!ok) return json(502, { ok: false, error: 'upstream_error' }, cors);
+      return json(200, { ok: true, status: 'removed', friend: friendSummary(target) }, cors);
+    }
 
     /* ---------- 拒绝 ---------- */
     if (action === 'decline') {

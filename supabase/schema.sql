@@ -6,12 +6,13 @@
 
 create extension if not exists pgcrypto;
 
--- ---------- 排行榜 ----------
--- 一名玩家一行：player_id 由客户端生成并持久化，
--- 提交时按 player_id upsert，score 取历史最大值（累计总开采量）。
+-- ---------- 排行榜（月度） ----------
+-- 一名玩家每个月一行：player_id + month 唯一，
+-- score 为该月挖矿量，只增不减；榜单取当月前 100。
 create table if not exists public.leaderboard (
   id          uuid primary key default gen_random_uuid(),
   player_id   uuid,
+  month       text        not null default to_char(now(), 'YYYYMM'),
   nickname    text        not null,
   score       integer     not null,
   avatar_url  text,
@@ -19,6 +20,7 @@ create table if not exists public.leaderboard (
   ip_hash     text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
+  constraint leaderboard_month_fmt    check (month ~ '^[0-9]{6}$'),
   constraint leaderboard_nickname_len check (char_length(nickname) between 1 and 12),
   constraint leaderboard_score_range  check (score >= 0)
 );
@@ -30,18 +32,29 @@ update public.leaderboard set updated_at = created_at where updated_at is null;
 alter table public.leaderboard alter column updated_at set default now();
 alter table public.leaderboard alter column updated_at set not null;
 
--- player_id 唯一：每名玩家只有一行（NULL 不冲突，兼容旧的匿名记录）
-create unique index if not exists leaderboard_player_uidx on public.leaderboard (player_id);
+-- 月度化：老数据按记录时间归入对应月份
+alter table public.leaderboard add column if not exists month text;
+update public.leaderboard set month = to_char(created_at, 'YYYYMM') where month is null;
+alter table public.leaderboard alter column month set default to_char(now(), 'YYYYMM');
+alter table public.leaderboard alter column month set not null;
 
-comment on table  public.leaderboard            is '排行榜：一名玩家一行，score 为累计总开采量';
+-- 旧的「一名玩家一行」索引必须去掉，否则无法按月各存一行
+drop index if exists public.leaderboard_player_uidx;
+create unique index if not exists leaderboard_player_month_uidx
+  on public.leaderboard (player_id, month);
+
+comment on table  public.leaderboard            is '月度排行榜：player_id + month 一行，score 为当月挖矿量';
+comment on column public.leaderboard.month      is '榜单月份 YYYYMM（按 Asia/Shanghai 计算）';
 comment on column public.leaderboard.player_id  is '客户端生成并持久化的玩家标识，用于 upsert';
 comment on column public.leaderboard.stats      is '白名单统计字段：runs,wins,mined,best,kills,survived,ore';
 comment on column public.leaderboard.ip_hash    is '提交者 IP 的加盐 SHA-256 前 32 位，仅用于限流';
 
--- 榜单排序：累计开采量高的在前，同分先达成者在前
-create index if not exists leaderboard_score_idx   on public.leaderboard (score desc, created_at asc);
-create index if not exists leaderboard_created_idx on public.leaderboard (created_at desc);
-create index if not exists leaderboard_ip_idx      on public.leaderboard (ip_hash, created_at desc);
+-- 榜单排序：当月挖矿量高的在前，同分先达成者在前
+create index if not exists leaderboard_month_score_idx on public.leaderboard (month, score desc, created_at asc);
+create index if not exists leaderboard_score_idx       on public.leaderboard (score desc, created_at asc);
+create index if not exists leaderboard_created_idx     on public.leaderboard (created_at desc);
+create index if not exists leaderboard_ip_idx          on public.leaderboard (ip_hash, created_at desc);
+
 
 -- ---------- 写入前处理 ----------
 -- 1. 累计分数只增不减（本地存档重置也不会把榜上成绩改小）

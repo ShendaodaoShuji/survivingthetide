@@ -1,7 +1,7 @@
 /**
- * Netlify Function · GET /api/leaderboard/top?limit=10&offset=0&me=<playerId>
+ * Netlify Function · GET /api/leaderboard/top?limit=100&offset=0&month=YYYYMM&me=<playerId>
  *
- * 读取排行榜（按累计总开采量降序，同分先达成者在前）。
+ * 读取月度排行榜（默认当月，按本月挖矿量降序，同分先达成者在前）。
  * me 可选：传了就在对应行标记 self:true（不返回 player_id）。
  *
  * 需要的环境变量与提交接口相同：
@@ -15,10 +15,16 @@
  *   ] }
  */
 
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 100;
 const MAX_OFFSET = 5000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** 当月键 YYYYMM，固定按 Asia/Shanghai（UTC+8） */
+function currentMonth() {
+  const d = new Date(Date.now() + 8 * 3600 * 1000);
+  return d.toISOString().slice(0, 7).replace('-', '');
+}
 
 export const config = { path: '/api/leaderboard/top' };
 
@@ -43,6 +49,7 @@ function env(name, fallback) {
 }
 
 function clampInt(raw, fallback, min, max) {
+  if (raw === null || raw === undefined || raw === '') return fallback;
   const n = Number(raw);
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, Math.floor(n)));
@@ -74,6 +81,8 @@ export default async function handler(request) {
   const url = new URL(request.url);
   const limit = clampInt(url.searchParams.get('limit'), DEFAULT_LIMIT, 1, MAX_LIMIT);
   const offset = clampInt(url.searchParams.get('offset'), 0, 0, MAX_OFFSET);
+  const monthParam = url.searchParams.get('month') || '';
+  const month = /^[0-9]{6}$/.test(monthParam) ? monthParam : currentMonth();
   const meRaw = url.searchParams.get('me') || '';
   const me = UUID_RE.test(meRaw) ? meRaw.toLowerCase() : null;
 
@@ -86,6 +95,7 @@ export default async function handler(request) {
 
   const query =
     'select=id,player_id,nickname,score,avatar_url,stats,updated_at' +
+    '&month=eq.' + encodeURIComponent(month) +
     '&order=score.desc,created_at.asc' +
     '&limit=' + limit +
     '&offset=' + offset;
@@ -123,6 +133,7 @@ export default async function handler(request) {
       200,
       {
         ok: true,
+        month,
         total: total === null ? entries.length : total,
         limit,
         offset,
