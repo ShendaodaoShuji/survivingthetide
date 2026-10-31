@@ -86,7 +86,7 @@ export default async function handler(request) {
   const meRaw = url.searchParams.get('me') || '';
   const me = UUID_RE.test(meRaw) ? meRaw.toLowerCase() : null;
 
-  const supabaseUrl = env('SUPABASE_URL', '').replace(/\/+$/, '');
+  const supabaseUrl = env('SUPABASE_URL', '').replace(/\/+$/, '').replace(/\/(rest|storage)\/v1$/i, '').replace(/\/+$/, '');
   const key = env('SUPABASE_SERVICE_ROLE_KEY', '');
   if (!supabaseUrl || !key) {
     console.error('leaderboard-top: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY');

@@ -63,7 +63,7 @@ function env(name, fallback) {
 
 function sbEnv() {
   return {
-    url: env('SUPABASE_URL', '').replace(/\/+$/, ''),
+    url: env('SUPABASE_URL', '').replace(/\/+$/, '').replace(/\/(rest|storage)\/v1$/i, '').replace(/\/+$/, ''),
     key: env('SUPABASE_SERVICE_ROLE_KEY', ''),
     bucket: env('SUPABASE_AVATAR_BUCKET', DEFAULT_BUCKET),
     dryRun: env('DRY_RUN', '') === '1'
