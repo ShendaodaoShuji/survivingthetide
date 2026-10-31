@@ -85,3 +85,60 @@ create policy leaderboard_read
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do update set public = excluded.public;
+
+-- ============================================================
+-- 玩家档案（工号 / 昵称 / 头像 / 最后活跃 / 库存）
+-- ============================================================
+
+create table if not exists public.players (
+  miner_id       text primary key,
+  player_id      uuid unique,
+  nickname       text        not null default '无名矿工',
+  avatar_url     text,
+  inventory      jsonb       not null default '{}'::jsonb,
+  last_active_at timestamptz not null default now(),
+  created_at     timestamptz not null default now(),
+  constraint players_miner_id_fmt check (miner_id ~ '^MINER-[0-9]{6}-[0-9]{6}$'),
+  constraint players_nickname_len  check (char_length(nickname) between 1 and 12),
+  constraint players_inventory_obj check (jsonb_typeof(inventory) = 'object')
+);
+
+comment on table  public.players               is '玩家云端档案：一名玩家一行，主键为工号';
+comment on column public.players.miner_id      is '工号，格式 MINER-YYYYMM-XXXXXX';
+comment on column public.players.player_id     is '与排行榜关联的客户端 UUID（可空）';
+comment on column public.players.inventory     is '玩家点「同步库存」时上传的库存快照（JSON）';
+comment on column public.players.last_active_at is '最后一次同步/活跃时间';
+
+create index if not exists players_active_idx on public.players (last_active_at desc);
+
+-- 只允许 service_role（Netlify Function）读写；
+-- 客户端不直连，因此不建任何 anon/authenticated 策略。
+alter table public.players enable row level security;
+
+-- ============================================================
+-- 好友关系（好友申请 + 已通过）
+-- 一行代表一对关系：requester 发起、addressee 接收。
+-- ============================================================
+
+create table if not exists public.friendships (
+  id              uuid primary key default gen_random_uuid(),
+  requester_miner text        not null references public.players(miner_id) on delete cascade,
+  addressee_miner text        not null references public.players(miner_id) on delete cascade,
+  status          text        not null default 'pending'
+                              check (status in ('pending', 'accepted')),
+  created_at      timestamptz not null default now(),
+  responded_at    timestamptz,
+  constraint friendships_not_self check (requester_miner <> addressee_miner)
+);
+
+comment on table public.friendships is '好友关系：pending 为待同意，accepted 为已成好友';
+
+-- 同一对玩家只允许一行（与方向无关）：A→B 和 B→A 视为同一对
+create unique index if not exists friendships_pair_uidx
+  on public.friendships (least(requester_miner, addressee_miner), greatest(requester_miner, addressee_miner));
+
+create index if not exists friendships_requester_idx on public.friendships (requester_miner, status);
+create index if not exists friendships_addressee_idx on public.friendships (addressee_miner, status);
+
+alter table public.friendships enable row level security;
+

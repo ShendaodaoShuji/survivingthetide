@@ -334,6 +334,15 @@ export default async function handler(request, context) {
   const playerId = playerResult.id;
   const cfg = sbEnv();
 
+  // 头像已经由 /api/sync-player 上传过时，直接复用这个公开 URL
+  let providedAvatarUrl = null;
+  if (typeof body.avatarUrl === 'string' && body.avatarUrl) {
+    const prefix = cfg.url + '/storage/v1/object/public/' + cfg.bucket + '/';
+    if (body.avatarUrl.indexOf(prefix) === 0 && body.avatarUrl.length < 500) {
+      providedAvatarUrl = body.avatarUrl;
+    }
+  }
+
   if (!cfg.dryRun && (!cfg.url || !cfg.key)) {
     console.error('leaderboard-submit: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY');
     return json(500, { ok: false, error: 'server_misconfigured' }, cors);
@@ -376,7 +385,7 @@ export default async function handler(request, context) {
       });
     }
 
-    let avatarUrl = null;
+    let avatarUrl = providedAvatarUrl;
     const warnings = [];
     if (avatarResult.avatar) {
       try {
