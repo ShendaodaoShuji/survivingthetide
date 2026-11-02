@@ -1996,7 +1996,7 @@ function wipeAccount(){
   };
   if(typeof fetch!=='function'||!oldMiner){ resetLocal(false); return; }
   setCloudState('','正在删除云端档案…');
-  fetch('/api/delete-account',{
+  fetch(apiUrl('/api/delete-account'),{
     method:'POST',
     headers:{'content-type':'application/json'},
     body:JSON.stringify({minerId:oldMiner,playerId:oldPlayer||null})
@@ -2063,8 +2063,17 @@ function pickFile(){
 }
 
 /* ---------- 云端排行榜（按累计总开采量） ---------- */
-var LB_SUBMIT='/api/leaderboard';
-var LB_TOP='/api/leaderboard/top';
+// 线上站点：用 file:// 直接打开本地文件时，云端请求指向这里
+var CLOUD_ORIGIN='https://chimerical-tanuki-a9bf68.netlify.app';
+var API_BASE=(function(){
+  try{
+    if(typeof location!=='undefined'&&/^https?:$/.test(location.protocol)) return '';
+  }catch(e){}
+  return CLOUD_ORIGIN;
+})();
+function apiUrl(path){ return API_BASE+path; }
+var LB_SUBMIT=apiUrl('/api/leaderboard');
+var LB_TOP=apiUrl('/api/leaderboard/top');
 var UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 var _lbLoading=false;
 
@@ -2206,9 +2215,9 @@ function loadLeaderboard(){
 
 /* ---------- 工号 / 云端档案 / 好友 ---------- */
 var MINER_RE=/^MINER-\d{6}-\d{6}$/;
-var CLOUD_API='/api/sync-player';
-var FR_API_ADD='/api/add-friend';
-var FR_API_LIST='/api/get-friends';
+var CLOUD_API=apiUrl('/api/sync-player');
+var FR_API_ADD=apiUrl('/api/add-friend');
+var FR_API_LIST=apiUrl('/api/get-friends');
 var _cloudBusy=false,_minerRetry=0,_friendsBusy=false,_friendsData=null;
 var _reqQueue=[],_reqSeen={},_reqCurrent=null,_currentFriend=null;
 
@@ -2290,7 +2299,7 @@ function runDiag(){
   box.textContent='检查中…';
   var m=g('mDiag'); if(m) m.className='mask on';
   if(typeof fetch!=='function'){ box.textContent='当前环境不支持网络请求'; return; }
-  fetch('/api/diag',{headers:{accept:'application/json'}})
+  fetch(apiUrl('/api/diag'),{headers:{accept:'application/json'}})
     .then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(b){ return {status:r.status,body:b}; });
     })
