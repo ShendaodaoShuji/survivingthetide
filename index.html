@@ -54,6 +54,9 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 .ab:active{transform:scale(.9)}
 .ab u{font-size:18px;text-decoration:none;line-height:1;margin-bottom:1px}
 .ab b{font-weight:400;font-size:8px}
+.abIc{display:flex;align-items:center;justify-content:center;width:20px;height:20px;margin-bottom:1px}
+.abIc svg{width:100%;height:100%;display:block}
+.ab.wpn .abIc{width:18px;height:18px;margin:0}
 .ab[data-p]{grid-area:pau}
 .ab.mine{border-color:#d4649a;color:#d4649a;grid-area:mine}
 .ab.wpn{grid-area:wpn;width:auto;height:44px;border-radius:22px;flex-direction:row;gap:7px;
@@ -139,6 +142,14 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09)}
 .item2 .sw{flex:0 0 auto;width:50px;height:50px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
  display:flex;align-items:center;justify-content:center;font-size:23px;background:rgba(255,255,255,.04)}
+.item2 .swcol{flex:0 0 auto;width:50px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.item2 .swcol .sw{width:50px;height:50px}
+.ic{display:block;width:30px;height:30px}
+.ic svg{display:block;width:100%;height:100%}
+.prog{display:flex;gap:2px;width:46px}
+.prog i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.16)}
+.prog i.on{background:#ff8c4a}
+.prog.permanent i.on{background:#4ade80}
 .item2 .c2m{flex:1;min-width:0}
 .item2 .c2m b{display:block;font-size:12.5px;font-weight:600;color:#eef0ea}
 .item2 .c2m span{display:block;margin-top:3px;font-size:10px;line-height:1.55;color:#8b97a8}
@@ -329,10 +340,10 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 <div id="nub"></div>
 <div id="stickLbl">MOVE</div>
 <div id="acts">
-  <div class="ab wpn" id="bWpn"><u id="wpnIc">⛏</u><b id="wpnNm">矿镐</b></div>
-  <div class="ab spr" id="bSpr"><em id="sprN">3</em><u>⚡</u><b>冲刺</b></div>
+  <div class="ab wpn" id="bWpn"><span class="abIc" id="wpnIc"></span><em id="wpnAmmo" style="display:none">0</em><b id="wpnNm">矿镐</b></div>
+  <div class="ab spr" id="bSpr"><em id="sprN">3</em><span class="abIc" id="sprIc"></span><b>冲刺</b></div>
   <div class="ab mine" id="bAct"><u>⛏</u><b id="actN">采集</b></div>
-  <div class="ab o2" id="bO2"><em id="o2N" style="display:none">0</em><u>🫧</u><b>氧气</b></div>
+  <div class="ab o2" id="bO2"><em id="o2N">0</em><span class="abIc" id="o2Ic"></span><b>氧气</b></div>
   <div class="ab" id="bPau"><u>⏸</u><b>暂停</b></div>
 </div>
 <div id="home" class="on">
@@ -371,6 +382,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
         <button class="st on" data-cat="skin">涂装</button>
         <button class="st" data-cat="pick">镐子</button>
         <button class="st" data-cat="bp">武器</button>
+        <button class="st" data-cat="carry">携行具</button>
       </div>
       <div id="shopGrid"></div>
       <p class="hint" id="shopHint"></p>
@@ -539,8 +551,8 @@ var SPD_WALK=150;
 var PICK_DMG=8;
 var WPN = {
   pick:  {melee:true,  dmg:8,  cd:0.22, nm:'矿镐',    col:'#d4649a'},
-  pistol:{melee:false, dmg:10, cd:0.34, nm:'手枪',    col:'#fbbf24'},
-  rifle: {melee:false, dmg:20, cd:0.13, nm:'磁轨步枪',col:'#4ade80'}
+  pistol:{melee:false, dmg:10, cd:0.34, nm:'机械手枪', col:'#fbbf24'},
+  rifle: {melee:false, dmg:20, cd:0.13, nm:'磁轨步枪', col:'#4ade80'}
 };
 var DIRS=['东','东南','南','西南','西','西北','北','东北'];
 function g(id){return document.getElementById(id);}
@@ -552,7 +564,8 @@ var EL={
   tDir:g('tDir'),arr:g('arr'),tide:g('tide'),tState:g('tState'),tTime:g('tTime'),
   stick:g('stick'),nub:g('nub'),
   bSpr:g('bSpr'),sprN:g('sprN'), bAct:g('bAct'),actN:g('actN'),
-  bWpn:g('bWpn'),wpnIc:g('wpnIc'),wpnNm:g('wpnNm'),
+  bWpn:g('bWpn'),wpnIc:g('wpnIc'),wpnNm:g('wpnNm'),wpnAmmo:g('wpnAmmo'),
+  sprIc:g('sprIc'),o2Ic:g('o2Ic'),
   bO2:g('bO2'),o2N:g('o2N'), bPau:g('bPau'),
   mEnd:g('mEnd'),mPau:g('mPau'),
   endT:g('endT'),eOre:g('eOre'),eTime:g('eTime'),eKill:g('eKill'),eTide:g('eTide'),eBank:g('eBank'),
@@ -564,7 +577,8 @@ var S_MENU=0,S_PLAY=1,S_PAUSE=2,S_END=3;
 var state=S_MENU;
 var p={x:0,y:0,r:14,hp:HP_MAX,oxy:OXY_MAX,face:-0.78,weapon:'pick',
        wAnim:0,mAnim:0,inv:0,hurt:0,tanks:0,kills:0,ore:0,walkT:0,walkA:0,kx:0,ky:0,
-       sT:0,sCd:0,sCh:SPRINT_MAX,sOn:false};
+       sT:0,sCd:0,sCh:SPRINT_MAX,sOn:false,
+       pickId:'p1',pickHits:1,ammo:{pistol:0,rifle:0},tanksCarried:0,sMax:SPRINT_MAX};
 var cam={x:0,y:0,sh:0};
 var veins=[],walls=[],drones=[],tanks=[],crates=[],shots=[],parts=[];
 var exit={x:2950,y:2950,r:44};
@@ -576,7 +590,7 @@ var keys={};
 var holdT=0, actCd=0, _activeBtn=null;
 var toasts=[];
 var pendingSpawns=0, spawnTimer=0;
-var _h={ore:-1,hp:-1,oxy:-1,td:-1,ds:'',cs:'',tk:-1,tn:-1,tt:'',sc:''};
+var _h={ore:-1,hp:-1,oxy:-1,td:-1,ds:'',cs:'',tk:-1,tn:-1,tt:'',sc:'',am:-1};
 var _raf=0;
 function nowMs(){ return (window.performance&&performance.now)?performance.now():Date.now(); }
 function rnd(a,b){return a+Math.random()*(b-a);}
@@ -603,11 +617,32 @@ function init(){
   tTimer=TIDE_FIRST;tOn=false;tLeft=0;gtime=0;nTide=0;tidePulseT=0;
   tDir=Math.random()*6.283;nDir=Math.random()*6.283;cover=false;
   joy.on=false;joy.x=0;joy.y=0;holdT=0;actCd=0;
+  // 本局携带：优先用商店刚买的临时镐，其次用永久解锁的
+  var runPick;
+  if(PROF.pendingPick&&pickOf(PROF.pendingPick).id===PROF.pendingPick){
+    runPick=PROF.pendingPick;          // 临时购买，本局一次性使用
+  }else{
+    runPick=PROF.pick;                 // 永久装备
+    if(runPick!=='p1'&&PROF.picks.indexOf(runPick)<0) runPick='p1';
+  }
+  p.pickId=runPick;
+  p.pickHits=pickOf(runPick).hits;
+  PROF.pendingPick='';
+
   unlocked={pick:1};
-  // 武器设计稿：永久解锁的开局装备
-  if(PROF.bp.pistol) unlocked.pistol=1;
-  if(PROF.bp.rifle)  unlocked.rifle=1;
-  p.weapon = unlocked.rifle ? 'rifle' : (unlocked.pistol ? 'pistol' : 'pick');
+  var startW='pick';
+  if(PROF.pendingWeapon){ unlocked[PROF.pendingWeapon]=1; startW=PROF.pendingWeapon; PROF.pendingWeapon=''; }
+  else if(PROF.bp.rifle){ unlocked.rifle=1; startW='rifle'; }
+  else if(PROF.bp.pistol){ unlocked.pistol=1; startW='pistol'; }
+  p.ammo={pistol:0,rifle:0};
+  if(startW!=='pick') p.ammo[startW]=MAG[startW];
+  p.weapon=startW;
+
+  p.tanksCarried=Math.min(3,PROF.carry.tank||0);
+  p.tanks=p.tanksCarried;
+  p.sMax=SPRINT_MAX+(PROF.carry.exo||0);
+  p.sCh=p.sMax; p.sCd=0;
+  saveProf();
   pendingSpawns=0; spawnTimer=0;
   cam.sh=0;
   var VDEF=[
@@ -631,10 +666,10 @@ function init(){
   for(var m=0;m<5;m++) tanks.push({x:rnd(300,W_-300),y:rnd(300,H_-300),dead:0,ph:Math.random()*6.28});
   for(var c=0;c<3;c++) crates.push({x:rnd(400,W_-400),y:rnd(400,H_-400),dead:0,ph:Math.random()*6.28});
   for(var d=0;d<6;d++) spawnDrone();
-  _h.ore=-1;_h.hp=-1;_h.oxy=-1;_h.td=-1;_h.ds='';_h.cs='';_h.tk=-1;_h.tn=-1;_h.tt='';_h.sc='';
+  _h.ore=-1;_h.hp=-1;_h.oxy=-1;_h.td=-1;_h.ds='';_h.cs='';_h.tk=-1;_h.tn=-1;_h.tt='';_h.sc='';_h.am=-1;
   layoutStick();
-  EL.bSpr.className='ab spr';EL.sprN.textContent=SPRINT_MAX;
-  EL.bO2.className='ab o2';EL.o2N.style.display='none';
+  EL.bSpr.className='ab spr';EL.sprN.textContent=p.sMax;
+  EL.bO2.className='ab o2';EL.o2N.textContent=p.tanks;
   EL.actN.textContent='采集';
   syncWpn();
   EL.tide.className='';
@@ -806,6 +841,11 @@ function toast(t,c){
 function doAct(){
   if(state!==S_PLAY||actCd>0) return;
   var w=WPN[p.weapon];
+  if(!w.melee && (p.ammo[p.weapon]||0)<=0){
+    actCd=0.3;
+    toast('弹匣空了','#ef4444');
+    return;
+  }
   actCd=w.cd; p.wAnim=0.22;
   if(w.melee) doMine(); else doShoot();
 }
@@ -837,8 +877,8 @@ function doMine(){
     if(d<v.r+34 && d<bd){bd=d;best=v;}
   }
   if(!best){ return; }
-  // 镐子：单击视为 N 次有效开采（1/3/5/7/9）
-  var hits=pickHits();
+  // 本局镐子的有效开采次数
+  var hits=p.pickHits||1;
   best.hp-=hits; p.mAnim=0.22;
   for(var j=0;j<3+Math.min(6,hits);j++) addP({x:best.x,y:best.y,vx:rnd(-1.5,1.5),vy:rnd(-2,-.5),life:22,c:'#d4649a',s:2});
   if(best.hp<=0){
@@ -851,6 +891,8 @@ function doMine(){
 }
 function doShoot(){
   var w=WPN[p.weapon];
+  if((p.ammo[p.weapon]||0)<=0) return;
+  p.ammo[p.weapon]--;
   var sp=(p.weapon==='pistol')?820:1250;
   var a=p.face+(Math.random()-.5)*((p.weapon==='pistol')?.09:.036);
   // 存 dmg 字段，与碰撞检测的读取一致
@@ -864,7 +906,16 @@ function useTank(){
   if(state!==S_PLAY) return;
   if(p.tanks<=0){toast('没有氧气罐了','#ef4444');return;}
   if(p.oxy>=OXY_MAX-1){toast('氧气已满','#7a8798');return;}
-  p.tanks--; p.oxy=Math.min(OXY_MAX,p.oxy+TANK_REFILL);
+  p.tanks--;
+  // 先用局内捡到的，最后才消耗购买的存量
+  if(p.tanks>p.tanksCarried){
+    // 消耗的是地表捡到的罐子，不减少商店存量
+  }else if(p.tanksCarried>0){
+    p.tanksCarried--;
+    PROF.carry.tank=Math.max(0,(PROF.carry.tank||0)-1);
+    saveProf();
+  }
+  p.oxy=Math.min(OXY_MAX,p.oxy+TANK_REFILL);
   for(var i=0;i<12;i++) addP({x:p.x,y:p.y,vx:rnd(-3,3),vy:rnd(-3,3),life:30,c:'#9b7dff',s:2});
   toast('+45% 氧气','#9b7dff');
 }
@@ -941,9 +992,9 @@ function update(dt){
   if(holdT<0)holdT=0;
   for(var i=toasts.length-1;i>=0;i--){toasts[i].life-=1;if(toasts[i].life<=0)toasts.splice(i,1);}
   if(p.sT>0){ p.sT-=dt; if(p.sT<=0){p.sT=0;p.sOn=false;syncSpr();} }
-  if(p.sCh<SPRINT_MAX){
+  if(p.sCh<p.sMax){
     p.sCd-=dt;
-    if(p.sCd<=0){p.sCd=SPRINT_CD;p.sCh=Math.min(SPRINT_MAX,p.sCh+1);syncSpr();}
+    if(p.sCd<=0){p.sCd=SPRINT_CD;p.sCh=Math.min(p.sMax,p.sCh+1);syncSpr();}
   }
   if(_activeBtn){
     holdT-=dt;
@@ -1020,8 +1071,11 @@ function update(dt){
     if(Math.hypot(cr.x-p.x,cr.y-p.y)<30){
       cr.dead=1;
       var g2 = (k===0)?'pistol':(Math.random()<0.5?'pistol':'rifle');
-      unlocked[g2]=1; p.weapon=g2; syncWpn();
-      toast('解锁：'+WPN[g2].nm,'#fbbf24');
+      var had=!!unlocked[g2];
+      unlocked[g2]=1;
+      p.ammo[g2]=MAG[g2];   // 补满弹匣，超出的不保留
+      p.weapon=g2; syncWpn();
+      toast(had?('补充弹药：'+WPN[g2].nm):('获得：'+WPN[g2].nm),'#fbbf24');
       for(var b=0;b<16;b++) addP({x:cr.x,y:cr.y,vx:rnd(-4,4),vy:rnd(-4,4),life:30,c:'#fbbf24',s:3});
     }
   }
@@ -1105,8 +1159,17 @@ var WPN_ORDER=['pick','pistol','rifle'];
 function syncWpn(){
   var w=WPN[p.weapon];
   EL.actN.textContent = w.melee?'采集':'开火';
-  EL.wpnIc.textContent = p.weapon==='pick'?'⛏':(p.weapon==='pistol'?'🔫':'⚡');
-  EL.wpnNm.textContent = w.melee ? (w.nm+' ×'+pickHits()) : w.nm;
+  if(w.melee){
+    var pk=pickOf(p.pickId||PROF.pick);
+    EL.wpnIc.innerHTML=iconPick(pk.tier);
+    EL.wpnNm.textContent=pk.nm;
+    EL.wpnAmmo.style.display='none';
+  }else{
+    EL.wpnIc.innerHTML=iconGun(p.weapon);
+    EL.wpnNm.textContent=w.nm;
+    EL.wpnAmmo.textContent=p.ammo[p.weapon]||0;
+    EL.wpnAmmo.style.display='flex';
+  }
   EL.bWpn.className = 'ab wpn';
 }
 function cycleWeapon(){
@@ -1438,8 +1501,12 @@ function syncHud(){
   var tt=(tOn?tLeft.toFixed(1):Math.max(0,tTimer).toFixed(0))+'s';
   if(tt!==_h.tt){_h.tt=tt;EL.tTime.textContent=tt;}
   if(p.tanks!==_h.tk){_h.tk=p.tanks;
-    EL.o2N.textContent=p.tanks;EL.o2N.style.display=p.tanks>0?'flex':'none';
+    EL.o2N.textContent=p.tanks;
     EL.bO2.className='ab o2'+(p.tanks<=0||p.oxy>=OXY_MAX-1?' off':'');}
+  if(!WPN[p.weapon].melee){
+    var am=p.ammo[p.weapon]||0;
+    if(am!==_h.am){_h.am=am;EL.wpnAmmo.textContent=am;}
+  }
   var sc='ab spr'+(p.sOn?' on':'')+(p.sCh<=0?' off':'');
   if(sc!==_h.sc){_h.sc=sc;EL.bSpr.className=sc;}
 }
@@ -1460,46 +1527,57 @@ var SKINS=[
    ds:'迦太基-7 的标准配发色，橙得像一簇将熄未熄的余烬。',
    bodyN:'#ff8c4a', bodyT:'#e05a8a', headN:'#e8e8e0', headT:'#e8e0ee',
    visN:'#1a2230', visT:'#9b7dff', glow:'rgba(120,200,255,.55)', glowT:'rgba(155,109,255,.7)', acc:'#c9d1d9'},
-  {id:'oasis', nm:'轻绿·绿洲同盟', price:60, mix:false,
+  {id:'oasis', nm:'轻绿·绿洲同盟', price:64, mix:false,
    ds:'绿洲同盟的补给涂装，浅绿外壳在盐碱地上反而最显眼。',
    bodyN:'#4ade80', bodyT:'#22d3ee', headN:'#e9fbf1', headT:'#ccfbf1',
    visN:'#052e22', visT:'#5eead4', glow:'rgba(74,222,128,.55)', glowT:'rgba(45,212,191,.7)', acc:'#bbf7d0'},
-  {id:'rust', nm:'血锈·铁锈地带', price:120, mix:false,
+  {id:'rust', nm:'血锈·铁锈地带', price:64, mix:false,
    ds:'铁锈地带淘来的旧涂装，干涸的血色和铁锈几乎分不清。',
    bodyN:'#ef4444', bodyT:'#f97316', headN:'#fecaca', headT:'#fed7aa',
    visN:'#2a0a0a', visT:'#fb923c', glow:'rgba(249,115,22,.6)', glowT:'rgba(251,146,60,.7)', acc:'#fca5a5'},
-  {id:'resonance', nm:'共鸣·萤火虫', price:240, mix:true,
+  {id:'resonance', nm:'共鸣·萤火虫', price:128, mix:true,
    ds:'橙灰混色。仿生萤火虫的鞘翅与腹部：橙是信号，灰是它藏身的夜。',
    bodyN:'#f59e0b', bodyT:'#22d3ee', secN:'#94a3b8', secT:'#64748b',
    headN:'#cbd5e1', headT:'#94a3b8',
    visN:'#1f2937', visT:'#fbbf24', glow:'rgba(251,191,36,.65)', glowT:'rgba(34,211,238,.7)', acc:'#e2e8f0'},
-  {id:'reverb', nm:'混响·记忆体', price:360, mix:true,
+  {id:'reverb', nm:'混响·记忆体', price:128, mix:true,
    ds:'紫蓝混色。像一段被反复回放的记忆，每次潮汐都在改写它。',
    bodyN:'#a78bfa', bodyT:'#f0abfc', secN:'#3b82f6', secT:'#6366f1',
    headN:'#c7d2fe', headT:'#ddd6fe',
    visN:'#1e1b4b', visT:'#e879f9', glow:'rgba(167,139,250,.6)', glowT:'rgba(232,121,249,.7)', acc:'#bfdbfe'}
 ];
-// 单击视为有效开采次数：1 / 3 / 5 / 7 / 9
+
+// 镐子：tier 决定图标，hits 决定单击的有效开采次数，need 为永久解锁所需购买次数
 var PICKS=[
-  {id:'p1', nm:'拾荒镐', hits:1, price:0,
-   ds:'矿务局配发的旧镐。单击视为 1 次有效开采。'},
-  {id:'p3', nm:'工兵镐', hits:3, price:60,
-   ds:'三齿并进。单击视为 3 次有效开采。'},
-  {id:'p5', nm:'深掘镐', hits:5, price:120,
-   ds:'加重镐头，一次落点砸出五道裂口。单击视为 5 次有效开采。'},
-  {id:'p7', nm:'裂岩镐', hits:7, price:240,
-   ds:'液压驱动的七齿镐，岩层在它面前像冻住的泥。单击视为 7 次有效开采。'},
-  {id:'p9', nm:'潮切镐', hits:9, price:360,
-   ds:'用潮汐残片锻成的九齿镐，落一次，整条矿脉都在回响。单击视为 9 次有效开采。'}
+  {id:'p1', nm:'拾荒镐', hits:1, price:0,   need:0, tier:0, ds:'矿务局配发的旧镐，握柄磨得发亮。'},
+  {id:'p2', nm:'工兵镐', hits:3, price:32,  need:2, tier:1, ds:'三齿并进，专凿硬岩。'},
+  {id:'p3', nm:'深掘镐', hits:5, price:64,  need:2, tier:2, ds:'加重镐头，一次落点砸出五道裂口。'},
+  {id:'p4', nm:'裂岩镐', hits:7, price:96,  need:3, tier:3, ds:'液压七齿，岩层在它面前像冻住的泥。'},
+  {id:'p5', nm:'潮切镐', hits:9, price:128, need:3, tier:4, ds:'潮汐残片锻成，落一次，整条矿脉都在回响。'}
 ];
+
+// 武器图纸：need 为永久解锁所需购买次数，mag 为弹匣容量
 var BPS=[
-  {id:'pistol', nm:'手枪设计稿', price:60, icon:'🔫',
-   ds:'开局即可携带「手枪」，不必再冒险去翻地表的武器箱。'},
-  {id:'rifle', nm:'磁轨步枪设计稿', price:300, icon:'⚡',
-   ds:'开局即可携带「磁轨步枪」，高射速与高穿透，正面压制无人机。'}
+  {id:'pistol', nm:'机械手枪图纸', price:32, need:2, mag:10, icon:'pistol',
+   ds:'下一局开局携带机械手枪，弹匣 10 发。'},
+  {id:'rifle', nm:'磁轨步枪图纸', price:64, need:3, mag:6, icon:'rifle',
+   ds:'下一局开局携带磁轨步枪，弹匣 6 发。'}
 ];
+
+// 携行具：每局自动携带；氧气罐用掉永久减少，外骨骼永久提升冲刺上限
+var CARRY=[
+  {id:'tank', nm:'氧气罐', price:16, max:3, icon:'tank',
+   ds:'每局自动携带；使用后永久减少一个。'},
+  {id:'exo', nm:'外骨骼', price:16, max:3, icon:'exo',
+   ds:'每局免费携带；每个让冲刺次数上限 +1。'}
+];
+
+var MAG={pistol:10, rifle:6};
 var PROF={nick:'无名矿工',avatar:'',ore:0,skins:['ember'],skin:'ember',
-          picks:['p1'],pick:'p1',bp:{},
+          picks:['p1'],pick:'p1',
+          pickBuy:{},pendingPick:'',
+          bp:{},bpBuy:{},pendingWeapon:'',
+          carry:{tank:0,exo:0},
           runs:0,wins:0,mined:0,best:0,
           month:'',monthMined:0,
           playerId:'',rank:0,syncedScore:-1,syncedNick:'',syncedAvatarSig:'',syncedAt:0,syncedMonth:'',
@@ -1513,6 +1591,67 @@ function pickOf(id){
   return PICKS[0];
 }
 function pickHits(){ return pickOf(PROF.pick).hits; }
+function bpOf(id){
+  for(var i=0;i<BPS.length;i++) if(BPS[i].id===id) return BPS[i];
+  return BPS[0];
+}
+function carryOf(id){
+  for(var i=0;i<CARRY.length;i++) if(CARRY[i].id===id) return CARRY[i];
+  return CARRY[0];
+}
+
+/* ---------- 图标（统一 32x32 线面风格） ---------- */
+function iconPick(tier){
+  var count=[1,3,5,7,9][tier]||1;
+  var head=['#94a3b8','#cbd5e1','#7dd3fc','#fdba74','#c4b5fd'][tier]||'#94a3b8';
+  var tooth=['#cbd5e1','#e2e8f0','#bae6fd','#fed7aa','#ddd6fe'][tier]||'#cbd5e1';
+  var s='';
+  s+='<path d="M9.5 29.5 L20 11.5" stroke="#8b5a2b" stroke-width="3.2" stroke-linecap="round"/>';
+  s+='<path d="M10.5 13.5 Q19 4.5 29.5 10.5" stroke="'+head+'" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+  for(var i=0;i<count;i++){
+    var t=count===1?0.5:i/(count-1);
+    var x=11+17*t;
+    var y=13.2-8.2*Math.sin(Math.PI*t);
+    s+='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+(x+1.6).toFixed(1)+'" y2="'+(y-3.6).toFixed(1)+'" stroke="'+tooth+'" stroke-width="1.7" stroke-linecap="round"/>';
+  }
+  return '<svg viewBox="0 0 32 32" fill="none">'+s+'</svg>';
+}
+function iconGun(id){
+  if(id==='pistol'){
+    return '<svg viewBox="0 0 32 32" fill="none">'+
+      '<path d="M5 13.5 h17.5 v5.5 h-4.2 l-1.6 3 h-6 l1.2-3 H5 z" fill="#2a3445" stroke="#4a5a6e" stroke-width="1.2" stroke-linejoin="round"/>'+
+      '<rect x="22.5" y="14.8" width="6" height="3.2" rx="1.2" fill="#fbbf24"/>'+
+      '<path d="M9.5 19.5 h5.4 l-1.8 9 h-5 z" fill="#4a5a6e" stroke="#2a3445" stroke-width="1" stroke-linejoin="round"/>'+
+      '<rect x="6.5" y="11.8" width="12" height="1.6" rx="0.8" fill="#4a5a6e"/>'+
+      '</svg>';
+  }
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<path d="M2.5 20.5 l4.5-5 h6.5 v2.8 h11 v-2.4 h4.5 v3.4 h-1.5 v3.4 h-4 l-1.2-2.2 H11 l-2.2 4.6 H5.4 l1.4-4.6 z" fill="#2a3445" stroke="#4a5a6e" stroke-width="1.2" stroke-linejoin="round"/>'+
+    '<rect x="26" y="14.4" width="5" height="3.6" rx="1.2" fill="#4ade80"/>'+
+    '<rect x="12.5" y="9.2" width="9" height="3" rx="1.4" fill="#4a5a6e"/>'+
+    '<rect x="17.5" y="20" width="4.2" height="7" rx="1" fill="#4a5a6e"/>'+
+    '<rect x="14" y="2.6" width="6.4" height="1.8" rx="0.9" fill="#2a3445"/>'+
+    '</svg>';
+}
+function iconCarry(id){
+  if(id==='tank'){
+    return '<svg viewBox="0 0 32 32" fill="none">'+
+      '<rect x="10" y="7" width="12" height="20" rx="6" fill="rgba(155,125,255,.22)" stroke="#9b7dff" stroke-width="1.8"/>'+
+      '<rect x="13" y="3" width="6" height="4" rx="1.6" fill="#9b7dff"/>'+
+      '<circle cx="16" cy="15" r="3.2" fill="rgba(155,125,255,.45)"/>'+
+      '<circle cx="12.6" cy="22.5" r="2" fill="rgba(155,125,255,.35)"/>'+
+      '</svg>';
+  }
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<path d="M18.5 3.5 L8.5 18 H14.5 L12.5 28.5 L24.5 13 H17.5 Z" fill="#4ade80" stroke="#2a3445" stroke-width="1.4" stroke-linejoin="round"/>'+
+    '</svg>';
+}
+function iconHtml(kind,id){
+  if(kind==='pick') return iconPick(pickOf(id).tier);
+  if(kind==='gun') return iconGun(id);
+  if(kind==='carry') return iconCarry(id);
+  return '';
+}
 function curSkin(){ return skinOf(PROF.skin); }
 function fmtNum(n){
   n=Math.max(0,Math.floor(n||0));
@@ -1552,16 +1691,41 @@ function loadProf(){
   }
   if(PROF.skins.indexOf('ember')<0) PROF.skins.unshift('ember');
   PROF.skin=skinOf(o.skin).id;
+  var LEGACY_PICK={p3:'p2',p5:'p3',p7:'p4',p9:'p5'};
   if(Object.prototype.toString.call(o.picks)==='[object Array]'){
     for(var pi=0;pi<o.picks.length;pi++){
-      var pid=o.picks[pi];
+      var pid=LEGACY_PICK[o.picks[pi]]||o.picks[pi];
       if(pickOf(pid).id===pid && PROF.picks.indexOf(pid)<0) PROF.picks.push(pid);
     }
   }
   if(PROF.picks.indexOf('p1')<0) PROF.picks.unshift('p1');
-  PROF.pick=pickOf(o.pick).id;
+  PROF.pick=pickOf(LEGACY_PICK[o.pick]||o.pick).id;
   if(o.bp&&typeof o.bp==='object'){
-    for(var k in o.bp){ if(o.bp[k]) PROF.bp[k]=1; }
+    for(var k in o.bp){ if(o.bp[k]&&bpOf(k).id===k) PROF.bp[k]=1; }
+  }
+  if(o.pickBuy&&typeof o.pickBuy==='object'){
+    for(var pi2=0;pi2<PICKS.length;pi2++){
+      var pk2=PICKS[pi2];
+      var n2=Math.floor(o.pickBuy[pk2.id]||0);
+      if(n2>0) PROF.pickBuy[pk2.id]=Math.min(n2,pk2.need||1);
+    }
+  }
+  if(typeof o.pendingPick==='string'&&pickOf(o.pendingPick).id===o.pendingPick&&PROF.picks.indexOf(o.pendingPick)<0){
+    PROF.pendingPick=o.pendingPick;
+  }
+  if(o.bpBuy&&typeof o.bpBuy==='object'){
+    for(var bi=0;bi<BPS.length;bi++){
+      var bd=BPS[bi];
+      var nb=Math.floor(o.bpBuy[bd.id]||0);
+      if(nb>0) PROF.bpBuy[bd.id]=Math.min(nb,bd.need);
+    }
+  }
+  if((o.pendingWeapon==='pistol'||o.pendingWeapon==='rifle')&&!PROF.bp[o.pendingWeapon]){
+    PROF.pendingWeapon=o.pendingWeapon;
+  }
+  if(o.carry&&typeof o.carry==='object'){
+    PROF.carry.tank=Math.max(0,Math.min(3,Math.floor(o.carry.tank||0)));
+    PROF.carry.exo=Math.max(0,Math.min(3,Math.floor(o.carry.exo||0)));
   }
   PROF.runs=Math.max(0,o.runs|0); PROF.wins=Math.max(0,o.wins|0);
   PROF.mined=Math.max(0,o.mined|0); PROF.best=Math.max(0,o.best|0);
@@ -1627,43 +1791,69 @@ function skinRow(sk){
   }
   return buildRow(sw,sk.nm,sk.ds,btn);
 }
+function progEl(filled,total,permanent){
+  var p=el2('div','prog'+(permanent?' permanent':''));
+  for(var i=0;i<total;i++){
+    var seg=el2('i');
+    if(i<filled) seg.className='on';
+    p.appendChild(seg);
+  }
+  return p;
+}
+function equipPick(pk){
+  PROF.pick=pk.id; saveProf(); renderShop(); renderMe();
+  hToast('已装备「'+pk.nm+'」','#c4b5fd');
+}
 function pickRow(pk){
-  var sw=el2('div','sw');
-  sw.style.flexDirection='column';
-  sw.style.gap='0px';
-  var ic=el2('span',null,'⛏');
-  ic.style.fontSize='17px'; ic.style.lineHeight='1';
-  var lab=el2('span',null,'×'+pk.hits);
-  lab.style.fontSize='9px'; lab.style.lineHeight='1.3'; lab.style.color='#c4b5fd'; lab.style.letterSpacing='.04em';
-  sw.appendChild(ic); sw.appendChild(lab);
-  var owned=PROF.picks.indexOf(pk.id)>=0;
+  var permanent=PROF.picks.indexOf(pk.id)>=0;
+  var bought=Math.min(PROF.pickBuy[pk.id]||0,pk.need||0);
+  var col=el2('div','swcol');
+  var sw=el2('div','sw'); sw.innerHTML=iconPick(pk.tier); col.appendChild(sw);
+  if(pk.need>0) col.appendChild(progEl(permanent?pk.need:bought,pk.need,permanent));
   var btn=el2('button','c2b');
-  if(owned&&PROF.pick===pk.id){
-    btn.className='c2b eq'; btn.textContent='已装备'; btn.disabled=true;
-  }else if(owned){
-    btn.className='c2b eq'; btn.textContent='装备';
-    btn.addEventListener('click',function(){
-      PROF.pick=pk.id; saveProf(); syncMoney(); renderShop(); renderMe();
-      hToast('已装备「'+pk.nm+'」· 单击 '+pk.hits+' 次开采','#c4b5fd');
-    });
+  if(permanent){
+    if(PROF.pick===pk.id){ btn.className='c2b eq'; btn.textContent='已装备'; btn.disabled=true; }
+    else{
+      btn.className='c2b eq'; btn.textContent='装备';
+      btn.addEventListener('click',function(){ equipPick(pk); });
+    }
   }else{
     btn.textContent=pk.price+' 矿';
     if(PROF.ore<pk.price) btn.style.opacity='.62';
     btn.addEventListener('click',function(){ buyPick(pk); });
   }
-  return buildRow(sw,pk.nm,pk.ds,btn);
+  return buildRow(col,pk.nm,pk.ds,btn);
 }
 function bpRow(bp){
-  var sw=el2('div','sw',bp.icon);
+  var permanent=!!PROF.bp[bp.id];
+  var bought=Math.min(PROF.bpBuy[bp.id]||0,bp.need);
+  var col=el2('div','swcol');
+  var sw=el2('div','sw'); sw.innerHTML=iconGun(bp.id); col.appendChild(sw);
+  col.appendChild(progEl(permanent?bp.need:bought,bp.need,permanent));
   var btn=el2('button','c2b');
-  if(PROF.bp[bp.id]){
-    btn.className='c2b own'; btn.textContent='已拥有'; btn.disabled=true;
+  if(permanent){
+    btn.className='c2b own'; btn.textContent='已解锁'; btn.disabled=true;
   }else{
     btn.textContent=bp.price+' 矿';
     if(PROF.ore<bp.price) btn.style.opacity='.62';
     btn.addEventListener('click',function(){ buyBp(bp); });
   }
-  return buildRow(sw,bp.nm,bp.ds,btn);
+  return buildRow(col,bp.nm,bp.ds,btn);
+}
+function carryRow(item){
+  var owned=PROF.carry[item.id]||0;
+  var col=el2('div','swcol');
+  var sw=el2('div','sw'); sw.innerHTML=iconCarry(item.id); col.appendChild(sw);
+  col.appendChild(progEl(owned,item.max,owned>=item.max));
+  var btn=el2('button','c2b');
+  if(owned>=item.max){
+    btn.className='c2b own'; btn.textContent='已满'; btn.disabled=true;
+  }else{
+    btn.textContent=item.price+' 矿';
+    if(PROF.ore<item.price) btn.style.opacity='.62';
+    btn.addEventListener('click',function(){ buyCarry(item); });
+  }
+  return buildRow(col,item.nm,item.ds,btn);
 }
 function renderShop(){
   var grid=g('shopGrid'); if(!grid) return;
@@ -1674,10 +1864,13 @@ function renderShop(){
     if(hint) hint.textContent='涂装改变你在矿区的机体配色，购买后自动装备，随时可切换。';
   }else if(shopCat==='pick'){
     for(var p=0;p<PICKS.length;p++) grid.appendChild(pickRow(PICKS[p]));
-    if(hint) hint.textContent='镐子决定「单击」的采矿效率：单击视为 1 / 3 / 5 / 7 / 9 次有效开采。';
-  }else{
+    if(hint) hint.textContent='镐子购买后在下一局携带；累计购买 2、2、3、3 次永久解锁。';
+  }else if(shopCat==='bp'){
     for(var j=0;j<BPS.length;j++) grid.appendChild(bpRow(BPS[j]));
-    if(hint) hint.textContent='武器设计稿为永久解锁，购买后每次出动都会自动携带。';
+    if(hint) hint.textContent='拥有武器可保护自己，提前抵御无人机。';
+  }else{
+    for(var c=0;c<CARRY.length;c++) grid.appendChild(carryRow(CARRY[c]));
+    if(hint) hint.textContent='携行具每局自动携带；氧气罐用掉永久减少，外骨骼永久提升冲刺上限。';
   }
 }
 function buySkin(sk){
@@ -1692,15 +1885,23 @@ function buySkin(sk){
   hToast('已购入「'+sk.nm+'」并装备','#4ade80');
 }
 function buyPick(pk){
-  if(PROF.picks.indexOf(pk.id)>=0) return;
+  if(PROF.picks.indexOf(pk.id)>=0){ equipPick(pk); return; }
   if(PROF.ore<pk.price){
     hToast('矿仓不足，还差 '+(pk.price-PROF.ore)+' 矿','#ef4444'); return;
   }
   PROF.ore-=pk.price;
-  PROF.picks.push(pk.id);
-  PROF.pick=pk.id;
+  var n=(PROF.pickBuy[pk.id]||0)+1;
+  PROF.pickBuy[pk.id]=Math.min(n,pk.need);
+  if(n>=pk.need){
+    PROF.picks.push(pk.id);
+    PROF.pick=pk.id;
+    if(PROF.pendingPick===pk.id) PROF.pendingPick='';
+    hToast('「'+pk.nm+'」已永久解锁','#4ade80');
+  }else{
+    PROF.pendingPick=pk.id;
+    hToast('已购买「'+pk.nm+'」· 下一局携带','#fbbf24');
+  }
   saveProf(); syncMoney(); renderShop(); renderMe();
-  hToast('已购入「'+pk.nm+'」并装备 · 单击 '+pk.hits+' 次开采','#4ade80');
 }
 function buyBp(bp){
   if(PROF.bp[bp.id]) return;
@@ -1708,9 +1909,28 @@ function buyBp(bp){
     hToast('矿仓不足，还差 '+(bp.price-PROF.ore)+' 矿','#ef4444'); return;
   }
   PROF.ore-=bp.price;
-  PROF.bp[bp.id]=1;
+  var n=(PROF.bpBuy[bp.id]||0)+1;
+  PROF.bpBuy[bp.id]=Math.min(n,bp.need);
+  if(n>=bp.need){
+    PROF.bp[bp.id]=1;
+    if(PROF.pendingWeapon===bp.id) PROF.pendingWeapon='';
+    hToast('「'+bp.nm+'」已永久解锁','#4ade80');
+  }else{
+    PROF.pendingWeapon=bp.id;
+    hToast('已购买「'+bp.nm+'」· 下一局携带','#fbbf24');
+  }
   saveProf(); syncMoney(); renderShop(); renderMe();
-  hToast('已解锁「'+bp.nm+'」','#fbbf24');
+}
+function buyCarry(item){
+  var cur=PROF.carry[item.id]||0;
+  if(cur>=item.max){ hToast('已达上限','#7a8798'); return; }
+  if(PROF.ore<item.price){
+    hToast('矿仓不足，还差 '+(item.price-PROF.ore)+' 矿','#ef4444'); return;
+  }
+  PROF.ore-=item.price;
+  PROF.carry[item.id]=cur+1;
+  saveProf(); syncMoney(); renderShop(); renderMe();
+  hToast('已购入「'+item.nm+'」×'+(cur+1),'#4ade80');
 }
 
 /* ---------- 我的 ---------- */
@@ -1785,7 +2005,7 @@ function renderMe(){
   set('pfMonthMined',fmtNum(PROF.monthMined));
   set('pfRuns',PROF.runs);
   set('pfWins',PROF.wins);
-  set('pfPickNm',pickOf(PROF.pick).nm+' ×'+pickHits());
+  set('pfPickNm',pickOf(PROF.pick).nm);
   set('pfMinerId',ensureMinerId());
   if(PROF.cloudSyncedAt){
     setCloudState('ok','已同步 · '+timeAgo(new Date(PROF.cloudSyncedAt).toISOString()));
@@ -2025,6 +2245,7 @@ function buildInventory(){
     picks: (PROF.picks||[]).slice(),
     pick: PROF.pick,
     bp: PROF.bp||{},
+    carry: { tank: PROF.carry.tank||0, exo: PROF.carry.exo||0 },
     stats:{runs:PROF.runs,wins:PROF.wins,mined:PROF.mined,best:PROF.best}
   };
 }
@@ -2606,6 +2827,8 @@ loadProf();
 ensurePlayerId();
 ensureMinerId();
 ensureMonth();
+EL.sprIc.innerHTML=iconCarry('exo');
+EL.o2Ic.innerHTML=iconCarry('tank');
 renderMe();
 renderShop();
 syncMoney();
