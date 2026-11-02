@@ -50,12 +50,14 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
  z-index:25;display:grid;grid-template-columns:60px 60px;grid-template-areas:"wpn wpn" "spr mine" "o2 pau";gap:8px}
 .ab{width:60px;height:60px;border-radius:50%;background:rgba(20,26,38,.94);
  border:2px solid rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;
- font-size:9px;color:#b6bfcd;letter-spacing:.05em;z-index:25;cursor:pointer;transition:transform .08s}
+ font-size:9px;color:#b6bfcd;letter-spacing:.05em;z-index:25;cursor:pointer;transition:transform .08s;position:relative}
 .ab:active{transform:scale(.9)}
 .ab u{font-size:18px;text-decoration:none;line-height:1;margin-bottom:1px}
 .ab b{font-weight:400;font-size:8px}
 .abIc{display:flex;align-items:center;justify-content:center;width:20px;height:20px;margin-bottom:1px}
 .abIc svg{width:100%;height:100%;display:block}
+.emojiIc{font-size:26px;line-height:1}
+.abIc .emojiIc{font-size:16px}
 .ab.wpn .abIc{width:18px;height:18px;margin:0}
 .ab[data-p]{grid-area:pau}
 .ab.mine{border-color:#d4649a;color:#d4649a;grid-area:mine}
@@ -342,7 +344,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 <div id="acts">
   <div class="ab wpn" id="bWpn"><span class="abIc" id="wpnIc"></span><em id="wpnAmmo" style="display:none">0</em><b id="wpnNm">矿镐</b></div>
   <div class="ab spr" id="bSpr"><em id="sprN">3</em><span class="abIc" id="sprIc"></span><b>冲刺</b></div>
-  <div class="ab mine" id="bAct"><u>⛏</u><b id="actN">采集</b></div>
+  <div class="ab mine" id="bAct"><span class="abIc" id="actIc"></span><b id="actN">采集</b></div>
   <div class="ab o2" id="bO2"><em id="o2N">0</em><span class="abIc" id="o2Ic"></span><b>氧气</b></div>
   <div class="ab" id="bPau"><u>⏸</u><b>暂停</b></div>
 </div>
@@ -563,7 +565,7 @@ var EL={
   vOxy:g('vOxy'),bOxy:g('bOxy'), vTide:g('vTide'),bTide:g('bTide'),
   tDir:g('tDir'),arr:g('arr'),tide:g('tide'),tState:g('tState'),tTime:g('tTime'),
   stick:g('stick'),nub:g('nub'),
-  bSpr:g('bSpr'),sprN:g('sprN'), bAct:g('bAct'),actN:g('actN'),
+  bSpr:g('bSpr'),sprN:g('sprN'), bAct:g('bAct'),actN:g('actN'),actIc:g('actIc'),
   bWpn:g('bWpn'),wpnIc:g('wpnIc'),wpnNm:g('wpnNm'),wpnAmmo:g('wpnAmmo'),
   sprIc:g('sprIc'),o2Ic:g('o2Ic'),
   bO2:g('bO2'),o2N:g('o2N'), bPau:g('bPau'),
@@ -1159,6 +1161,7 @@ var WPN_ORDER=['pick','pistol','rifle'];
 function syncWpn(){
   var w=WPN[p.weapon];
   EL.actN.textContent = w.melee?'采集':'开火';
+  EL.actIc.innerHTML = iconMono(w.melee?'pick':p.weapon);
   if(w.melee){
     var pk=pickOf(p.pickId||PROF.pick);
     EL.wpnIc.innerHTML=iconPick(pk.tier);
@@ -1602,19 +1605,15 @@ function carryOf(id){
 
 /* ---------- 图标（统一 32x32 线面风格） ---------- */
 function iconPick(tier){
-  var count=[1,3,5,7,9][tier]||1;
-  var head=['#94a3b8','#cbd5e1','#7dd3fc','#fdba74','#c4b5fd'][tier]||'#94a3b8';
-  var tooth=['#cbd5e1','#e2e8f0','#bae6fd','#fed7aa','#ddd6fe'][tier]||'#cbd5e1';
-  var s='';
-  s+='<path d="M9.5 29.5 L20 11.5" stroke="#8b5a2b" stroke-width="3.2" stroke-linecap="round"/>';
-  s+='<path d="M10.5 13.5 Q19 4.5 29.5 10.5" stroke="'+head+'" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
-  for(var i=0;i<count;i++){
-    var t=count===1?0.5:i/(count-1);
-    var x=11+17*t;
-    var y=13.2-8.2*Math.sin(Math.PI*t);
-    s+='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+(x+1.6).toFixed(1)+'" y2="'+(y-3.6).toFixed(1)+'" stroke="'+tooth+'" stroke-width="1.7" stroke-linecap="round"/>';
-  }
-  return '<svg viewBox="0 0 32 32" fill="none">'+s+'</svg>';
+  // 与原版 ⛏ 一致的造型：木柄 + 弯月镐头，只按档位换金属色
+  var head=['#9aa4b2','#c7d2e0','#8ec5e8','#e8b77a','#c3aef0'][tier]||'#9aa4b2';
+  var grip=['#7a5230','#7a5230','#6b4a2c','#5f3f24','#4f3620'][tier]||'#7a5230';
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<path d="M8 28.5 L20 10" stroke="'+grip+'" stroke-width="3.4" stroke-linecap="round"/>'+
+    '<path d="M11 9 Q20 4 29 9" stroke="'+head+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    '<path d="M11 9 L8.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M29 9 L31.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '</svg>';
 }
 function iconGun(id){
   if(id==='pistol'){
@@ -1642,9 +1641,25 @@ function iconCarry(id){
       '<circle cx="12.6" cy="22.5" r="2" fill="rgba(155,125,255,.35)"/>'+
       '</svg>';
   }
-  return '<svg viewBox="0 0 32 32" fill="none">'+
-    '<path d="M18.5 3.5 L8.5 18 H14.5 L12.5 28.5 L24.5 13 H17.5 Z" fill="#4ade80" stroke="#2a3445" stroke-width="1.4" stroke-linejoin="round"/>'+
-    '</svg>';
+  // 外骨骼：保留原来的黄色闪电
+  return '<span class="emojiIc">⚡</span>';
+}
+// 动作按钮上的单色武器轮廓（同造型，单色描边）
+function iconMono(kind){
+  if(kind==='pistol'){
+    return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">'+
+      '<path d="M5 13.5 h17.5 v5.5 h-4.2 l-1.6 3 h-6 l1.2-3 H5 z"/>'+
+      '<path d="M9.5 19.5 h5.4 l-1.8 9 h-5 z"/>'+
+      '<path d="M22.5 14.8 h6"/></svg>';
+  }
+  if(kind==='rifle'){
+    return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">'+
+      '<path d="M2.5 20.5 l4.5-5 h6.5 v2.8 h11 v-2.4 h4.5 v3.4 h-1.5 v3.4 h-4 l-1.2-2.2 H11 l-2.2 4.6 H5.4 l1.4-4.6 z"/>'+
+      '<path d="M26 14.4 h5"/><path d="M12.5 9.2 h9"/></svg>';
+  }
+  return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round">'+
+    '<path d="M8 28.5 L20 10"/><path d="M11 9 Q20 4 29 9"/>'+
+    '<path d="M11 9 L8.2 12.2"/><path d="M29 9 L31.2 12.2"/></svg>';
 }
 function iconHtml(kind,id){
   if(kind==='pick') return iconPick(pickOf(id).tier);
@@ -2348,6 +2363,7 @@ function syncPlayerCloud(){
       return res.body;
     }
     var code=(res.body&&res.body.error)||('HTTP '+res.status);
+    var det=(res.body&&res.body.detail)?String(res.body.detail):'';
     if(code==='miner_id_taken'&&_minerRetry<1){
       _minerRetry++;
       PROF.minerId='';
@@ -2355,9 +2371,13 @@ function syncPlayerCloud(){
       _cloudBusy=false;
       return syncPlayerCloud();
     }
-    throw new Error(code);
+    throw new Error(code+'|'+det);
   }).catch(function(e){
-    setCloudState('err','同步失败：'+cloudErrText((e&&e.message)||''));
+    var raw=(e&&e.message)||'';
+    var parts=raw.split('|');
+    var shown=cloudErrText(parts[0]);
+    if(parts[1]) shown+='（'+parts[1].slice(0,48)+'）';
+    setCloudState('err','同步失败：'+shown);
     return null;
   }).then(function(x){ _cloudBusy=false; return x; });
 }
@@ -2827,7 +2847,8 @@ loadProf();
 ensurePlayerId();
 ensureMinerId();
 ensureMonth();
-EL.sprIc.innerHTML=iconCarry('exo');
+EL.sprIc.textContent='⚡';
+EL.sprIc.style.fontSize='17px';
 EL.o2Ic.innerHTML=iconCarry('tank');
 renderMe();
 renderShop();

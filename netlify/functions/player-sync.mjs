@@ -213,6 +213,19 @@ export default async function handler(request) {
     if (playerId) row.player_id = playerId;
     if (avatarUrl) row.avatar_url = avatarUrl;
 
+    // 换过工号后，旧行可能还占着同一个 player_id（唯一约束）→ 先解绑，避免 upsert 撞 409
+    if (playerId) {
+      await fetch(
+        cfg.url + '/rest/v1/players?player_id=eq.' + encodeURIComponent(playerId) +
+          '&miner_id=neq.' + encodeURIComponent(minerId),
+        {
+          method: 'PATCH',
+          headers: sbHeaders(cfg, { 'content-type': 'application/json', prefer: 'return=minimal' }),
+          body: JSON.stringify({ player_id: null })
+        }
+      ).catch(() => {});
+    }
+
     const res = await fetch(cfg.url + '/rest/v1/players?on_conflict=miner_id', {
       method: 'POST',
       headers: sbHeaders(cfg, {
@@ -224,9 +237,11 @@ export default async function handler(request) {
 
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      if (res.status === 409) return json(409, { ok: false, error: 'miner_id_taken' }, cors);
       console.error('sync-player: upsert failed', res.status, detail.slice(0, 200));
-      return json(502, { ok: false, error: 'upstream_error' }, cors);
+      if (res.status === 409) {
+        return json(409, { ok: false, error: 'miner_id_taken', detail: detail.slice(0, 160) }, cors);
+      }
+      return json(502, { ok: false, error: 'upstream_error', detail: detail.slice(0, 160) }, cors);
     }
 
     const rows = await res.json();
