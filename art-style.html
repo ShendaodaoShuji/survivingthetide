@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>无烬冬日 · 美术规范预览</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0f16;color:#eef0ea;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;padding:28px 22px 60px;line-height:1.6}
+h1{font-size:22px;letter-spacing:.12em;font-weight:600;color:#f0e6d8}
+.sub{font-size:11px;letter-spacing:.18em;color:#7a8798;margin:6px 0 26px}
+h2{font-size:13px;letter-spacing:.16em;color:#d08a4e;font-weight:500;margin:30px 0 12px;padding-left:9px;border-left:3px solid #d08a4e}
+.panel{background:#141b26;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.sw{display:flex;align-items:center;gap:9px;font-size:10px;color:#b6bfcd}
+.sw i{width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.16);flex:0 0 auto}
+.sw b{display:block;color:#eef0ea;font-weight:500;font-size:10.5px}
+.sw span{font-family:ui-monospace,monospace;color:#7a8798;font-size:9px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.cell{background:#141b26;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px;text-align:center}
+.row3{display:flex;align-items:center;justify-content:center;gap:14px;height:96px}
+.icon svg{display:block;width:100%;height:100%}
+.s32{width:32px;height:32px}.s64{width:64px;height:64px}.s96{width:96px;height:96px}
+.cell b{display:block;font-size:11px;color:#eef0ea;margin-top:8px;font-weight:500}
+.cell span{display:block;font-size:9px;color:#7a8798;letter-spacing:.06em}
+.mono{display:flex;gap:18px;justify-content:center;padding:10px 0}
+.mono div{width:60px;height:60px;border-radius:50%;border:2px solid #d4649a;color:#d4649a;display:flex;align-items:center;justify-content:center}
+.mono svg{width:22px;height:22px}
+.emoji{font-size:38px;line-height:1}
+.rules{font-size:11.5px;color:#b6bfcd;columns:2;column-gap:26px}
+.rules li{margin:0 0 7px 16px;break-inside:avoid}
+.bad{color:#fca5a5}.good{color:#86efac}
+canvas{display:block;margin:0 auto;image-rendering:auto}
+.note{font-size:10px;color:#7a8798;margin-top:10px}
+@media(max-width:560px){.rules{columns:1}}
+</style>
+</head>
+<body>
+<h1>无烬冬日 · 潮汐求生</h1>
+<div class="sub">ART STYLE PREVIEW · 32×32 / FLAT / 2PX OUTLINE</div>
+
+<h2>色板</h2>
+<div class="panel pal">
+  <div class="sw"><i style="background:#141b26"></i><div><b>深底</b><span>#141b26</span></div></div>
+  <div class="sw"><i style="background:#ff8c4a"></i><div><b>橙 · 采集</b><span>#ff8c4a</span></div></div>
+  <div class="sw"><i style="background:#d4649a"></i><div><b>粉 · 源能矿</b><span>#d4649a</span></div></div>
+  <div class="sw"><i style="background:#4ade80"></i><div><b>绿 · 氧气</b><span>#4ade80</span></div></div>
+  <div class="sw"><i style="background:#9b7dff"></i><div><b>紫 · 潮汐</b><span>#9b7dff</span></div></div>
+  <div class="sw"><i style="background:#2a3445"></i><div><b>金属深</b><span>#2a3445</span></div></div>
+  <div class="sw"><i style="background:#4a5a6e"></i><div><b>金属中</b><span>#4a5a6e</span></div></div>
+  <div class="sw"><i style="background:#9aa4b2"></i><div><b>金属亮</b><span>#9aa4b2</span></div></div>
+  <div class="sw"><i style="background:#7a5230"></i><div><b>木柄</b><span>#7a5230</span></div></div>
+  <div class="sw"><i style="background:#eef0ea"></i><div><b>高光/文字</b><span>#eef0ea</span></div></div>
+</div>
+
+<h2>镐子 · 五档（同造型，只换镐头金属色）</h2>
+<div class="grid" id="picks"></div>
+
+<h2>枪械 / 携行具</h2>
+<div class="grid" id="gear"></div>
+
+<h2>动作键单色轮廓（跟随按钮色）</h2>
+<div class="panel">
+  <div class="mono" id="mono"></div>
+  <div class="note">左：镐（采集）· 中：手枪（开火）· 右：步枪（开火）</div>
+</div>
+
+<h2>原始 emoji（保留原样，不重绘）</h2>
+<div class="panel" style="display:flex;gap:30px;justify-content:center;align-items:center">
+  <span class="emoji">⛏</span><span class="emoji">🔫</span><span class="emoji" style="color:#fbbf24">⚡</span><span class="emoji">🫧</span>
+</div>
+
+<h2>Canvas 手绘角色</h2>
+<div class="panel" style="text-align:center">
+  <canvas id="ch" width="200" height="200"></canvas>
+  <div class="note">半径 14 · 躯干 24×20 圆角 6 · 头 9 · 仅 1 层暗部、1 层高光，无渐变</div>
+</div>
+
+<h2>规则要点</h2>
+<div class="panel">
+  <ul class="rules">
+    <li>画布 <b>32×32</b>，内容限制 2–30，安全边距 2px</li>
+    <li>描边统一 <b>2px</b>，圆角 2–6px</li>
+    <li>单图标 ≤ <b>3 色</b>，取自上方色板</li>
+    <li>禁止渐变、投影、纹理、发光</li>
+    <li>18px 下仍可辨认轮廓</li>
+    <li>镐子不按齿数区分，只换金属色</li>
+    <li>枪械统一侧视：手枪短粗、步枪细长</li>
+    <li class="good">✓ 平涂 + 简单几何 + 深底高对比</li>
+    <li class="bad">✗ 拟真材质 / 多色渐变 / emoji 重绘</li>
+    <li>状态字形 ◆ ♥ ◉ ⚡ 仅作文字使用</li>
+  </ul>
+</div>
+
+<script>
+function iconPick(tier){
+  var head=['#9aa4b2','#c7d2e0','#8ec5e8','#e8b77a','#c3aef0'][tier]||'#9aa4b2';
+  var grip=['#7a5230','#7a5230','#6b4a2c','#5f3f24','#4f3620'][tier]||'#7a5230';
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<path d="M8 28.5 L20 10" stroke="'+grip+'" stroke-width="3.4" stroke-linecap="round"/>'+
+    '<path d="M11 9 Q20 4 29 9" stroke="'+head+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    '<path d="M11 9 L8.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M29 9 L31.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '</svg>';
+}
+function iconGun(id){
+  if(id==='pistol'){
+    return '<svg viewBox="0 0 32 32" fill="none">'+
+      '<path d="M5 13.5 h17.5 v5.5 h-4.2 l-1.6 3 h-6 l1.2-3 H5 z" fill="#2a3445" stroke="#4a5a6e" stroke-width="1.2" stroke-linejoin="round"/>'+
+      '<rect x="22.5" y="14.8" width="6" height="3.2" rx="1.2" fill="#fbbf24"/>'+
+      '<path d="M9.5 19.5 h5.4 l-1.8 9 h-5 z" fill="#4a5a6e" stroke="#2a3445" stroke-width="1" stroke-linejoin="round"/>'+
+      '<rect x="6.5" y="11.8" width="12" height="1.6" rx="0.8" fill="#4a5a6e"/></svg>';
+  }
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<path d="M2.5 20.5 l4.5-5 h6.5 v2.8 h11 v-2.4 h4.5 v3.4 h-1.5 v3.4 h-4 l-1.2-2.2 H11 l-2.2 4.6 H5.4 l1.4-4.6 z" fill="#2a3445" stroke="#4a5a6e" stroke-width="1.2" stroke-linejoin="round"/>'+
+    '<rect x="26" y="14.4" width="5" height="3.6" rx="1.2" fill="#4ade80"/>'+
+    '<rect x="12.5" y="9.2" width="9" height="3" rx="1.4" fill="#4a5a6e"/>'+
+    '<rect x="17.5" y="20" width="4.2" height="7" rx="1" fill="#4a5a6e"/></svg>';
+}
+function iconTank(){
+  return '<svg viewBox="0 0 32 32" fill="none">'+
+    '<rect x="10" y="7" width="12" height="20" rx="6" fill="rgba(155,125,255,.22)" stroke="#9b7dff" stroke-width="1.8"/>'+
+    '<rect x="13" y="3" width="6" height="4" rx="1.6" fill="#9b7dff"/>'+
+    '<circle cx="16" cy="15" r="3.2" fill="rgba(155,125,255,.45)"/>'+
+    '<circle cx="12.6" cy="22.5" r="2" fill="rgba(155,125,255,.35)"/></svg>';
+}
+function iconMono(kind){
+  if(kind==='pistol') return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 13.5 h17.5 v5.5 h-4.2 l-1.6 3 h-6 l1.2-3 H5 z"/><path d="M9.5 19.5 h5.4 l-1.8 9 h-5 z"/><path d="M22.5 14.8 h6"/></svg>';
+  if(kind==='rifle') return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2.5 20.5 l4.5-5 h6.5 v2.8 h11 v-2.4 h4.5 v3.4 h-1.5 v3.4 h-4 l-1.2-2.2 H11 l-2.2 4.6 H5.4 l1.4-4.6 z"/><path d="M26 14.4 h5"/><path d="M12.5 9.2 h9"/></svg>';
+  return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M8 28.5 L20 10"/><path d="M11 9 Q20 4 29 9"/><path d="M11 9 L8.2 12.2"/><path d="M29 9 L31.2 12.2"/></svg>';
+}
+
+function cell(name,note,html){
+  return '<div class="cell"><div class="row3">'+
+    '<div class="icon s32">'+html+'</div>'+
+    '<div class="icon s64">'+html+'</div>'+
+    '<div class="icon s96">'+html+'</div>'+
+    '</div><b>'+name+'</b><span>'+note+'</span></div>';
+}
+
+var picks=[
+  ['拾荒镐','pick1 · 18/30px'],
+  ['工兵镐','pick2 · 18/30px'],
+  ['深掘镐','pick3 · 18/30px'],
+  ['裂岩镐','pick4 · 18/30px'],
+  ['潮切镐','pick5 · 18/30px']
+];
+document.getElementById('picks').innerHTML = picks.map(function(p,i){
+  return cell(p[0],p[1],iconPick(i));
+}).join('');
+
+document.getElementById('gear').innerHTML =
+  cell('机械手枪','pistol · 18/30px',iconGun('pistol'))+
+  cell('磁轨步枪','rifle · 18/30px',iconGun('rifle'))+
+  cell('氧气罐','tank · 20/30px',iconTank())+
+  cell('外骨骼','emoji ⚡ · 17/26px','<span style="font-size:40px;line-height:1;color:#fbbf24">⚡</span>');
+
+document.getElementById('mono').innerHTML =
+  '<div>'+iconMono('pick')+'</div><div>'+iconMono('pistol')+'</div><div>'+iconMono('rifle')+'</div>';
+
+/* ---- canvas 角色（与 drawPlayer 同形状） ---- */
+(function(){
+  var c=document.getElementById('ch'), ctx=c.getContext('2d');
+  var dp=Math.min(window.devicePixelRatio||1,2);
+  c.width=200*dp; c.height=200*dp; c.style.width='200px'; c.style.height='200px';
+  ctx.scale(dp,dp);
+  ctx.translate(100,104);
+  ctx.scale(3.1,3.1);
+  /* 影子 */
+  ctx.fillStyle='rgba(0,0,0,.35)';
+  ctx.beginPath(); ctx.ellipse(0,13,13,5,0,0,6.283); ctx.fill();
+  /* 腿 */
+  ctx.fillStyle='#1f2937'; ctx.fillRect(-4,-11,12,6);
+  ctx.fillStyle='#2a3445'; ctx.fillRect(-4,5,12,6);
+  /* 躯干 */
+  ctx.fillStyle='#ff8c4a';
+  roundRect(ctx,-12,-10,24,20,6); ctx.fill();
+  /* 胸带 / 背包 */
+  ctx.fillStyle='rgba(0,0,0,.28)'; roundRect(ctx,-8,-3,16,5,2); ctx.fill();
+  ctx.fillStyle='#33404f'; roundRect(ctx,1,-8,13,6,3); ctx.fill();
+  /* 肩甲 */
+  ctx.fillStyle='#ff8c4a';
+  roundRect(ctx,-13,-11,7,7,2); ctx.fill();
+  roundRect(ctx,6,-11,7,7,2); ctx.fill();
+  /* 头 */
+  ctx.save(); ctx.translate(2,0);
+  ctx.fillStyle='#e8e8e0';
+  ctx.beginPath(); ctx.arc(0,0,9,0,6.283); ctx.fill();
+  ctx.fillStyle='#1a2230'; roundRect(ctx,3,-5,5,10,2); ctx.fill();
+  ctx.fillStyle='rgba(120,200,255,.55)'; roundRect(ctx,4,-3,2,6,1); ctx.fill();
+  ctx.restore();
+  /* 镐子 */
+  ctx.save();
+  ctx.fillStyle='#8b5a2b'; ctx.fillRect(8,-2,26,5);
+  ctx.save(); ctx.translate(34,0); ctx.rotate(.7);
+  ctx.fillStyle='#c9d1d9'; ctx.fillRect(-2,-2,16,5); ctx.restore();
+  ctx.restore();
+
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+    c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+    c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+  }
+})();
+</script>
+</body>
+</html>
