@@ -1605,14 +1605,15 @@ function carryOf(id){
 
 /* ---------- 图标（统一 32x32 线面风格） ---------- */
 function iconPick(tier){
-  // 与原版 ⛏ 一致的造型：木柄 + 弯月镐头，只按档位换金属色
+  // 以原版 ⛏ emoji 为原型：斜木柄 + 弯月镐头 + 两端尖角；
+  // 只按档位换镐头金属色与木柄深浅，不改变造型。
   var head=['#9aa4b2','#c7d2e0','#8ec5e8','#e8b77a','#c3aef0'][tier]||'#9aa4b2';
   var grip=['#7a5230','#7a5230','#6b4a2c','#5f3f24','#4f3620'][tier]||'#7a5230';
   return '<svg viewBox="0 0 32 32" fill="none">'+
-    '<path d="M8 28.5 L20 10" stroke="'+grip+'" stroke-width="3.4" stroke-linecap="round"/>'+
-    '<path d="M11 9 Q20 4 29 9" stroke="'+head+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
-    '<path d="M11 9 L8.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
-    '<path d="M29 9 L31.2 12.2" stroke="'+head+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M7.5 28.5 L16 9" stroke="'+grip+'" stroke-width="3.4" stroke-linecap="round"/>'+
+    '<path d="M8 10 Q16 3 24 10" stroke="'+head+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    '<path d="M8 10 L5 13.5" stroke="'+head+'" stroke-width="2.6" stroke-linecap="round"/>'+
+    '<path d="M24 10 L27 13.5" stroke="'+head+'" stroke-width="2.6" stroke-linecap="round"/>'+
     '</svg>';
 }
 function iconGun(id){
